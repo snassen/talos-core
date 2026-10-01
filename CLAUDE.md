@@ -91,7 +91,8 @@ src/talos/
   backup.py       the nightly backup of the owner's own work (talos backup; TALOS_HOME/backups/<date>), restore in
                   docs/backup.md
   screenlab/      the screen lab: injection samples from public sources (one module each, capped, deduplicated),
-                  talos-doctor's rules and Jev measured on them (talos screen); never prints a sample
+                  talos-doctor's rules and Jev measured on them, rule candidates mined from where they differ
+                  (talos screen); never prints a sample
   db.py           connections and migrations (applied in name order, recorded in schema_migration)
   secrets.py      the macOS Keychain, and nowhere else; exists() never prompts
   accounts.py     the owner's accounts and addresses (from TALOS_HOME/config/accounts.json), and the sync source for each

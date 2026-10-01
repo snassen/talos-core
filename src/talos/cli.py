@@ -4,7 +4,7 @@
     talos status                      counts, last sync per account, secrets present or not
     talos doctor [ARGS…]              is this Mac ready, and the next step (talos-doctor; --guides, --only PHASE, --json);
                                       talos doctor pr OWNER/REPO N: screen a pull request before an agent reads it
-    talos screen sources|source|import|rules|jev|report   the screen lab: injection samples from public sources,
+    talos screen sources|source|import|rules|jev|report|mine|candidates|decide|export   the screen lab: injection samples from public sources,
                                       talos-doctor's rules and Jev measured on them (never prints a sample)
     talos where [--json] [--write F]  where everything is, and why: code, personal part, data, database, Keychain
                                       (names only), services, backups
@@ -384,6 +384,39 @@ def cmd_screen(a, s):
                 print(report.report(conn, r["run"]), end="")
             elif a.screen_cmd == "report":
                 print(report.report(conn, a.run, against=a.against), end="")
+            elif a.screen_cmd == "mine":
+                from talos.screenlab import mine
+                with conn.transaction():
+                    m = mine.mine(conn)
+                print(f"Mined from {m['train']:,} samples ({m['target']:,} attacks Jev caught and the rules missed);"
+                      f" measured on {m['held']:,} held back.")
+                print(f"{m['candidates']} candidates. Together, on the held-back part: {m['held_newly_caught']:,} of the"
+                      f" {m['held_missed_by_rules']:,} attacks the rules miss would be caught, with {m['held_new_alarms']}"
+                      f" false alarms on {m['held_benign']:,} ordinary samples.")
+                print("Review them: talos screen candidates")
+            elif a.screen_cmd == "candidates":
+                rows = conn.execute("select * from screen_candidate order by status, held_new desc").fetchall()
+                print(f"{'id':>4} {'status':9} {'held: caught (new)':>19} {'alarms':>6} {'all alarms':>10}  {'top source':24}  phrasing")
+                for r in rows:
+                    print(f"{r['id']:>4} {r['status']:9} {r['held_attacks']:>11} ({r['held_new']:>5}) {r['held_benign']:>6}"
+                          f" {r['benign_all']:>10}  {(r['top_source'] or '-')[:16]:16} {r['top_share']:>6.0%}  {' '.join(r['words'])}")
+            elif a.screen_cmd == "decide":
+                ids = [int(x) for x in (a.ids or [])] or ([int(a.id)] if a.id else [])
+                status = "accepted" if a.accept else "rejected" if a.reject else None
+                if not ids or not status:
+                    raise SystemExit("talos: decide ID… --accept or --reject")
+                n = conn.execute("update screen_candidate set status = %s, decided_at = now() where id = any(%s)",
+                                 (status, ids)).rowcount
+                print(f"{n} candidate{'s' if n != 1 else ''} {status}")
+            elif a.screen_cmd == "export":
+                from talos.screenlab import mine
+                out = mine.export(conn)
+                text = json.dumps(out, indent=1, ensure_ascii=False) + "\n"
+                if a.out:
+                    Path(a.out).write_text(text, encoding="utf-8")
+                    print(f"{len(out['rules'])} rules written to {a.out}")
+                else:
+                    print(text, end="")
         except (SourceError, runs.RunError) as exc:
             raise SystemExit(f"talos: {exc}") from None
 
@@ -1504,7 +1537,8 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("setup").set_defaults(fn=cmd_setup)
     sub.add_parser("status").set_defaults(fn=cmd_status)
     x = sub.add_parser("screen", help="the screen lab: injection samples, talos-doctor's rules and Jev measured on them")
-    x.add_argument("screen_cmd", choices=["sources", "source", "import", "rules", "jev", "report"])
+    x.add_argument("screen_cmd", choices=["sources", "source", "import", "rules", "jev", "report", "mine", "candidates",
+                                          "decide", "export"])
     x.add_argument("ids", nargs="*", help="import: the sources (default: those switched on)")
     x.add_argument("--id", help="source: which one")
     x.add_argument("--on", action="store_true")
@@ -1516,6 +1550,9 @@ def main(argv: list[str] | None = None) -> None:
     x.add_argument("--max-usd", type=float, help="jev: the most this run may cost; without it, only the estimate")
     x.add_argument("--run", help="report: this run (default: the latest)")
     x.add_argument("--against", help="report: compare with this run (default: the latest of the other engine)")
+    x.add_argument("--accept", action="store_true", help="decide: accept the candidates")
+    x.add_argument("--reject", action="store_true", help="decide: reject the candidates")
+    x.add_argument("--out", help="export: write the accepted candidates as talos-doctor rules to this file")
     x.set_defaults(fn=cmd_screen)
     sub.add_parser("doctor", help="is this Mac ready for Talos, and the next step (talos-doctor; reads only; "
                                   "talos doctor --help for its options)")
