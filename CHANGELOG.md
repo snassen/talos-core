@@ -15,6 +15,13 @@ Each change goes under **Unreleased** in the same commit that makes it; a releas
   product in its own repository; Talos runs it, from its repository when it is not installed. It reads only.
 - **`talos doctor pr OWNER/REPO NUMBER`**: screens a pull request for text aimed at a model before an agent
   reads it (talos-doctor's screen): block, review or clean, and a cleaned view an agent may read.
+- **The screen lab** (`talos screen`): samples of prompt injection and of ordinary text, to measure and train
+  talos-doctor's screen. Each source is a module, switched on or off with its own cap, pinned to the revision it
+  was imported at: deepset prompt-injections, LLMail-Inject (Microsoft), agent-injection-bench,
+  AgentInjectionBench, Talos's own code as ordinary text, and the repository-files dataset (gated: needs a
+  Hugging Face token). Duplicates across all sources, exact or near, are found and left out. A rules run is free;
+  a Jev run is estimated first and needs a cost limit. The report gives catch and false-alarm rates per source,
+  kind of text and rule, and the rules against Jev; it never shows a sample.
 - **An MIT license** (LICENSE).
 - **Before you start** (README): what Talos gives you, what it is not, and what you need to bring.
 

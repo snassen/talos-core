@@ -4,6 +4,8 @@
     talos status                      counts, last sync per account, secrets present or not
     talos doctor [ARGS…]              is this Mac ready, and the next step (talos-doctor; --guides, --only PHASE, --json);
                                       talos doctor pr OWNER/REPO N: screen a pull request before an agent reads it
+    talos screen sources|source|import|rules|jev|report   the screen lab: injection samples from public sources,
+                                      talos-doctor's rules and Jev measured on them (never prints a sample)
     talos where [--json] [--write F]  where everything is, and why: code, personal part, data, database, Keychain
                                       (names only), services, backups
     talos config init [--dir DIR]     make your personal part from the examples (never overwrites); config path
@@ -337,6 +339,53 @@ def _backup(s, *, keep_days: int | None = None, quiet: bool = True) -> None:
         print(line + (f"; pruned {', '.join(m['pruned'])}" if m["pruned"] else ""))
         argus.ping(s.dsn, backup.SLUG, ok=True, expected_next_within=backup.EVERY,
                    summary=f"{m['values']} values, {m['links']} links, {size:.1f} MB")
+
+
+def cmd_screen(a, s):
+    """The screen lab (talos.screenlab): sources of injection samples and ordinary text, runs of talos-doctor's
+    rules and of Jev over them, and the report. Nothing here prints a sample."""
+    from talos.screenlab import manage, report, runs
+    from talos.screenlab.sources import SourceError
+    with _conn(s) as conn:
+        try:
+            if a.screen_cmd == "sources":
+                for r in manage.listing(conn):
+                    c = r["counts"] or {}
+                    print(f"{'on ' if r['enabled'] else 'off'} {r['id']:22} cap {r['cap'] or '-':>6}  {r['license'] or '?':11}"
+                          + (f" imported {c.get('imported', 0):,} ({c.get('attack', 0):,} attack, {c.get('benign', 0):,} benign,"
+                             f" {c.get('duplicates', 0):,} duplicates)" if r["imported_at"] else " not imported"))
+            elif a.screen_cmd == "source":
+                r = manage.set_source(conn, a.id or (a.ids[0] if a.ids else ""), enabled=True if a.on else False if a.off else None, cap=a.cap,
+                                      no_cap=a.no_cap)
+                print(f"{r['id']}: {'on' if r['enabled'] else 'off'}, cap {r['cap'] or 'none'}")
+            elif a.screen_cmd == "import":
+                ids = a.ids or [r["id"] for r in manage.listing(conn) if r["enabled"]]
+                if not ids:
+                    print("No source is on: talos screen source ID --on")
+                for sid in ids:
+                    with conn.transaction():
+                        c = manage.import_source(conn, sid, s.home / "screenlab" / "cache")
+                    print(f"{sid}: {c['imported']:,} imported ({c['attack']:,} attack, {c['benign']:,} benign),"
+                          f" {c['duplicates']:,} duplicates, {c['skipped']:,} skipped")
+            elif a.screen_cmd == "rules":
+                with conn.transaction():
+                    r = runs.run_rules(conn, sources=a.source, limit=a.limit)
+                print(f"{r['run']}: {r['samples']:,} samples judged by talos-doctor's rules")
+                print(report.report(conn, r["run"]), end="")
+            elif a.screen_cmd == "jev":
+                est = runs.estimate_jev(conn, sources=a.source, limit=a.limit)
+                print(f"Jev would judge {est['samples']:,} samples, about {est['tokens']:,} tokens: ${est['usd']:.2f}")
+                if a.max_usd is None:
+                    print("Nothing sent. To run: add --max-usd with a limit at or above the estimate.")
+                    return
+                r = runs.run_jev(conn, max_usd=a.max_usd, sources=a.source, limit=a.limit)
+                conn.commit()
+                print(f"{r['run']}: {r['samples']:,} judged, ${r['usd']:.4f}, {r['errors']} errors")
+                print(report.report(conn, r["run"]), end="")
+            elif a.screen_cmd == "report":
+                print(report.report(conn, a.run, against=a.against), end="")
+        except (SourceError, runs.RunError) as exc:
+            raise SystemExit(f"talos: {exc}") from None
 
 
 def cmd_status(a, s):
@@ -1454,6 +1503,20 @@ def main(argv: list[str] | None = None) -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("setup").set_defaults(fn=cmd_setup)
     sub.add_parser("status").set_defaults(fn=cmd_status)
+    x = sub.add_parser("screen", help="the screen lab: injection samples, talos-doctor's rules and Jev measured on them")
+    x.add_argument("screen_cmd", choices=["sources", "source", "import", "rules", "jev", "report"])
+    x.add_argument("ids", nargs="*", help="import: the sources (default: those switched on)")
+    x.add_argument("--id", help="source: which one")
+    x.add_argument("--on", action="store_true")
+    x.add_argument("--off", action="store_true")
+    x.add_argument("--cap", type=int, help="source: at most this many samples (stratified, the same every time)")
+    x.add_argument("--no-cap", action="store_true")
+    x.add_argument("--source", action="append", help="rules, jev: only these sources (default: those switched on)")
+    x.add_argument("--limit", type=int, help="rules, jev: at most this many samples")
+    x.add_argument("--max-usd", type=float, help="jev: the most this run may cost; without it, only the estimate")
+    x.add_argument("--run", help="report: this run (default: the latest)")
+    x.add_argument("--against", help="report: compare with this run (default: the latest of the other engine)")
+    x.set_defaults(fn=cmd_screen)
     sub.add_parser("doctor", help="is this Mac ready for Talos, and the next step (talos-doctor; reads only; "
                                   "talos doctor --help for its options)")
     x = sub.add_parser("where", help="where everything is, and why: the code, your personal part, the data, the database,"

@@ -35,6 +35,7 @@ TABLES = [
     "message_pattern", "subject_pattern", "sender_profile", "enrich_prediction", "enrich_case", "jev_prediction", "jev_case", "gold_check_item", "gold_label",
     "gold_item", "gold_set", "insight_cache", "improvement_job", "discovery_item", "discovery_source", "enrich_tick",
     "watcher", "aggregation", "web_session", "web_event", "web_state", "studio_verdict", "studio_lift", "studio_decision",
+    "screen_result", "screen_run", "screen_sample", "screen_source",
 ]
 
 
