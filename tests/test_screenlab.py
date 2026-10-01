@@ -124,3 +124,25 @@ def test_the_jev_verdict_needs_steering_and_for_block_also_hiding_or_persuading(
 def test_every_source_has_a_licence_an_address_and_a_loader():
     for s in SOURCES.values():
         assert s.license and s.url and callable(s.load) and s.id == s.id.lower()
+
+
+def test_a_cut_off_jev_run_resumes_and_sends_nothing_twice(lab, tmp_path, monkeypatch):
+    manage.import_source(lab, "made-a", tmp_path, NoFetch())
+    manage.set_source(lab, "made-a", enabled=True)
+    sent = []
+
+    def answer(request):
+        sent.append(json.loads(request.content)["state"]["piece"]["text"])
+        return httpx.Response(200, json={"model": jev.MODEL, "usage": {"input_tokens": 400, "output_tokens": 20},
+                                         "answers": {k: {"type": "choice", "choice": "no", "probabilities": {"yes": 0.0, "no": 1.0}}
+                                                     for k in runs.QUESTIONS}})
+    monkeypatch.setattr(jev.secrets, "get", lambda key: "test-key")
+    first = runs.run_jev(lab, max_usd=1.0, client=jev.JevClient(transport=httpx.MockTransport(answer)))
+    # as if it had been cut off after three answers
+    lab.execute("update screen_run set finished_at = null where id = %s", (first["run"],))
+    lab.execute("delete from screen_result where run_id = %s and sample_id in"
+                " (select sample_id from screen_result where run_id = %s order by sample_id limit 3)", (first["run"], first["run"]))
+    sent.clear()
+    again = runs.run_jev(lab, max_usd=1.0, client=jev.JevClient(transport=httpx.MockTransport(answer)))
+    assert again["run"] == first["run"] and len(sent) == 3
+    assert lab.execute("select count(*) as n from screen_result where run_id = %s", (first["run"],)).fetchone()["n"] == 6

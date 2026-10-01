@@ -120,29 +120,43 @@ def jev_verdict(scores: dict) -> str:
 
 def run_jev(conn: psycopg.Connection, *, max_usd: float, sources: list[str] | None = None, limit: int | None = None,
             client: jev.JevClient | None = None) -> dict:
-    est = estimate_jev(conn, sources=sources, limit=limit)
-    if est["usd"] > max_usd:
-        raise RunError(f"estimated ${est['usd']:.2f} for {est['samples']} samples, over --max-usd {max_usd:.2f}")
+    """Judge the samples with Jev. Each answer is stored as it arrives, so a run that is cut off resumes: an
+    unfinished run of the same question version continues, and the samples it already judged are not sent again."""
+    version = jev_version()
     rows = _targets(conn, sources, limit)
-    rid = _start(conn, "jev", jev_version(), {"sources": sources, "limit": limit, "estimate": est})
+    open_run = conn.execute("select id from screen_run where engine = 'jev' and version = %s and finished_at is null"
+                            " order by started_at desc limit 1", (version,)).fetchone()
+    rid = open_run["id"] if open_run else None
+    done = {r["sample_id"] for r in conn.execute("select sample_id from screen_result where run_id = %s", (rid,))} if rid else set()
+    todo = [r for r in rows if r["id"] not in done]
+    tokens = sum(jev.estimate_tokens(_body(r)) for r in todo)
+    if jev.cost(tokens) > max_usd:
+        raise RunError(f"estimated ${jev.cost(tokens):.2f} for {len(todo)} samples, over --max-usd {max_usd:.2f}")
+    if not rid:
+        rid = _start(conn, "jev", version, {"sources": sources, "limit": limit,
+                                            "estimate": {"samples": len(todo), "tokens": tokens, "usd": round(jev.cost(tokens), 4)}})
     conn.commit()
     client = client or jev.JevClient()
-    results: list[tuple] = []
+    spent = float(conn.execute("select cost_usd from screen_run where id = %s", (rid,)).fetchone()["cost_usd"])
+    n = {"judged": 0, "errors": 0}
 
     def on_result(res) -> None:
         if res.error or not res.response:
-            results.append((rid, res.case_id, "error", [], Jsonb({"error": str(res.error)[:200]})))
-            return
-        scores = {k: float((a.get("probabilities") or {}).get("yes", 0)) for k, a in res.response["answers"].items()}
-        results.append((rid, res.case_id, jev_verdict(scores), sorted(k for k, v in scores.items() if v >= THRESHOLD),
-                        Jsonb({k: round(v, 4) for k, v in scores.items()})))
+            row = (rid, res.case_id, "error", [], Jsonb({"error": str(res.error)[:200]}))
+            n["errors"] += 1
+        else:
+            scores = {k: float((a.get("probabilities") or {}).get("yes", 0)) for k, a in res.response["answers"].items()}
+            row = (rid, res.case_id, jev_verdict(scores), sorted(k for k, v in scores.items() if v >= THRESHOLD),
+                   Jsonb({k: round(v, 4) for k, v in scores.items()}))
+        cost = jev.cost(int((res.usage or {}).get("input_tokens") or 0))
+        conn.execute("insert into screen_result (run_id, sample_id, verdict, fired, scores) values (%s, %s, %s, %s, %s)"
+                     " on conflict (run_id, sample_id) do nothing", row)
+        conn.execute("update screen_run set samples = samples + 1, cost_usd = cost_usd + %s where id = %s", (cost, rid))
+        conn.commit()
+        n["judged"] += 1
 
-    asyncio.run(client.run(((r["id"], _body(r)) for r in rows), on_result))
-    with conn.cursor() as cur:
-        cur.executemany("insert into screen_result (run_id, sample_id, verdict, fired, scores) values (%s, %s, %s, %s, %s)",
-                        results)
-    usd = jev.cost(client.usage.input_tokens)
-    conn.execute("update screen_run set finished_at = now(), samples = %s, cost_usd = %s where id = %s",
-                 (len(results), usd, rid))
-    return {"run": rid, "samples": len(results), "usd": round(usd, 4),
-            "errors": sum(1 for r in results if r[2] == "error")}
+    asyncio.run(client.run(((r["id"], _body(r)) for r in todo), on_result))
+    conn.execute("update screen_run set finished_at = now() where id = %s", (rid,))
+    conn.commit()
+    usd = float(conn.execute("select cost_usd from screen_run where id = %s", (rid,)).fetchone()["cost_usd"])
+    return {"run": rid, "samples": n["judged"], "usd": round(usd - spent, 4), "total_usd": round(usd, 4), "errors": n["errors"]}
