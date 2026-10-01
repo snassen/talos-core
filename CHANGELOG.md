@@ -13,6 +13,8 @@ Each change goes under **Unreleased** in the same commit that makes it; a releas
 - **`talos doctor`**: is this Mac ready for Talos, and the next step for anything missing, with step-by-step
   guides (Gmail, Microsoft 365, PostgreSQL, your personal part, the services…). It is talos-doctor, its own
   product in its own repository; Talos runs it, from its repository when it is not installed. It reads only.
+- **`talos doctor pr OWNER/REPO NUMBER`**: screens a pull request for text aimed at a model before an agent
+  reads it (talos-doctor's screen): block, review or clean, and a cleaned view an agent may read.
 - **An MIT license** (LICENSE).
 - **Before you start** (README): what Talos gives you, what it is not, and what you need to bring.
 

@@ -2,7 +2,8 @@
 
     talos setup                       create the database, apply migrations, seed accounts, load the taxonomy
     talos status                      counts, last sync per account, secrets present or not
-    talos doctor [ARGS…]              is this Mac ready, and the next step (talos-doctor; --guides, --only PHASE, --json)
+    talos doctor [ARGS…]              is this Mac ready, and the next step (talos-doctor; --guides, --only PHASE, --json);
+                                      talos doctor pr OWNER/REPO N: screen a pull request before an agent reads it
     talos where [--json] [--write F]  where everything is, and why: code, personal part, data, database, Keychain
                                       (names only), services, backups
     talos config init [--dir DIR]     make your personal part from the examples (never overwrites); config path
@@ -259,7 +260,8 @@ def cmd_doctor(a, s):
     import subprocess
 
     from talos import personal
-    args = ["--repo", str(personal.REPO), *a.args]
+    # the setup checks are told where this code is; the screen (pr, scan) takes its arguments as they are
+    args = list(a.args) if a.args[:1] in (["pr"], ["scan"]) else ["--repo", str(personal.REPO), *a.args]
     try:
         from talos_doctor import cli as doctor
     except ImportError:

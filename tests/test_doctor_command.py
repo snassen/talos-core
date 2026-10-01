@@ -29,3 +29,18 @@ def test_talos_doctor_passes_its_arguments_and_the_code_folder_through(monkeypat
         cli.main(["doctor", "--only", "accounts"])
     assert e.value.code == 0
     assert seen["argv"][0] == "--repo" and seen["argv"][2:] == ["--only", "accounts"]
+
+
+def test_the_screen_gets_its_arguments_as_they_are(monkeypatch):
+    import sys
+    import types
+
+    seen = {}
+    fake = types.ModuleType("talos_doctor.cli")
+    fake.main = lambda argv: seen.setdefault("argv", argv) and 0
+    monkeypatch.setitem(sys.modules, "talos_doctor", types.ModuleType("talos_doctor"))
+    monkeypatch.setitem(sys.modules, "talos_doctor.cli", fake)
+    sys.modules["talos_doctor"].cli = fake
+    with pytest.raises(SystemExit):
+        cli.main(["doctor", "pr", "octocat/hello-world", "1"])
+    assert seen["argv"] == ["pr", "octocat/hello-world", "1"]
