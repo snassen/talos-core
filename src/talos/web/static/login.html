@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talos · Sign in</title>
+<link rel="icon" href="/static/icons/beacon-tab.ico" sizes="32x32">
+<link rel="icon" href="/static/icons/beacon-tab-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/static/icons/beacon-tab.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icons/beacon-touch-180.png" sizes="180x180">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/login.css">
+</head>
+<body class="login-body">
+<main class="login-card" aria-labelledby="login-h">
+  <svg class="beacon login-mark" viewBox="0 0 512 512" aria-hidden="true">
+    <defs><mask id="login-beacon-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="white"/><rect x="228" y="140" width="56" height="40" rx="6" fill="black"/>
+      <path d="M198 316 H314 M190 392 H322" fill="none" stroke="black" stroke-width="20" stroke-linecap="round"/></mask></defs>
+    <g mask="url(#login-beacon-cut)">
+      <path class="bm-beam" d="M204 136 L70 96 L70 190 Z"/><path class="bm-beam" d="M308 136 L442 96 L442 190 Z"/>
+      <g class="bm-tower"><path d="M196 124 L256 64 L316 124 Z"/><rect x="204" y="124" width="104" height="72"/>
+        <rect x="170" y="196" width="172" height="34" rx="6"/><path d="M208 230 H304 L330 468 H182 Z"/></g>
+    </g>
+    <rect class="bm-lamp" x="228" y="140" width="56" height="40" rx="6"/>
+  </svg>
+  <h1 id="login-h">Talos</h1>
+  <p class="login-sub">Sign in with your password and a code from your authenticator app.</p>
+  <form id="login-form" autocomplete="on" novalidate>
+    <label class="flabel" for="password">Password</label>
+    <input class="field" id="password" name="password" type="password" autocomplete="current-password" required>
+    <label class="flabel" for="code">Code</label>
+    <input class="field" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digits, or a recovery code" required>
+    <button class="btn primary" id="go" type="submit">Sign in</button>
+    <div id="msg" class="login-msg" role="alert" aria-live="polite"></div>
+  </form>
+  <p class="login-foot">Lost your phone? A recovery code works in the Code field, once each.</p>
+</main>
+<script type="module" src="/static/login.js"></script>
+</body>
+</html>

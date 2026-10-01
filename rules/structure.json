@@ -1,0 +1,828 @@
+{
+  "version": 2,
+  "note": "Where every mail should go in the new Talos/ structure (docs/mailbox-structure-plan.md). Read by talos structure plan; nothing here writes to a mailbox. Per account, an ordered list of targets: the first whose conditions all hold places the message. A target is 'inbox' (stays in the inbox, no label; only for mail in the inbox now, the inbox is never refilled), 'label' (a Gmail label or, later, an Exchange folder under Talos/) or 'leave' (never touched). Conditions read the message's effective values (human > rule > accepted model, the thread's values counting too). Edit freely and bump version; the next plan recomputes everything. Fields: sender (sender_kind, else the origin's side), sender_kind, sphere, form, keep, origin, type, topic, value, kind, ask, direction, folder, label, in_inbox, flagged, replied, ask_proposed, age_days. Operators: in, not_in, prefix, set, is, lt, gt; else (when the field has no value, test this instead); any / all (groups); use (a named condition list below).",
+  "conditions": {
+    "short_lived": [
+      {
+        "any": [
+          {
+            "field": "keep",
+            "in": [
+              "short_lived"
+            ]
+          },
+          {
+            "all": [
+              {
+                "field": "keep",
+                "set": false
+              },
+              {
+                "field": "value",
+                "in": [
+                  "context",
+                  "transient",
+                  "noise"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "not_a_keeper": [
+      {
+        "field": "value",
+        "not_in": [
+          "record_financial",
+          "record_legal",
+          "record_account",
+          "knowledge",
+          "decision",
+          "reference",
+          "memory"
+        ]
+      }
+    ],
+    "spam": [
+      {
+        "any": [
+          {
+            "field": "kind",
+            "in": [
+              "spam"
+            ],
+            "else": {
+              "field": "type",
+              "in": [
+                "spam"
+              ]
+            }
+          },
+          {
+            "field": "origin",
+            "in": [
+              "spam"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "blocks": {
+    "spam": [
+      {
+        "id": "spam",
+        "place": "label",
+        "path": "Talos/Automated/Spam candidates",
+        "why": "Spam or phishing by kind, type or origin, unless it is also a record or knowledge. Before the inbox, so a phishing mail posing as a person with a question never keeps its inbox place. Talos never deletes; you decide.",
+        "when": [
+          {
+            "use": "spam"
+          },
+          {
+            "use": "not_a_keeper"
+          }
+        ]
+      }
+    ],
+    "inbox": [
+      {
+        "id": "inbox-flagged",
+        "place": "inbox",
+        "path": "Inbox",
+        "why": "You flagged or starred it yourself: your decision beats every rule.",
+        "when": [
+          {
+            "field": "flagged",
+            "is": true
+          }
+        ]
+      },
+      {
+        "id": "inbox-open-ask",
+        "place": "inbox",
+        "path": "Inbox",
+        "why": "A person asks something of you (a question, an action, a decision, a deadline) and you have not replied in the thread since. Jev's ask is still only proposed in the archive, so a proposed ask counts too: keeping mail in the inbox is the cautious side.",
+        "when": [
+          {
+            "field": "sender",
+            "in": [
+              "people"
+            ]
+          },
+          {
+            "any": [
+              {
+                "field": "ask",
+                "set": true
+              },
+              {
+                "field": "ask_proposed",
+                "is": true
+              }
+            ]
+          },
+          {
+            "field": "replied",
+            "is": false
+          }
+        ]
+      },
+      {
+        "id": "inbox-recent",
+        "place": "inbox",
+        "path": "Inbox",
+        "why": "From a person, or not decided yet, and less than 14 days old. New mail has few values when it arrives; it is placed again as it ages.",
+        "when": [
+          {
+            "field": "sender",
+            "in": [
+              "people"
+            ],
+            "else": {
+              "field": "sender",
+              "set": false
+            }
+          },
+          {
+            "field": "age_days",
+            "lt": 14
+          }
+        ]
+      }
+    ],
+    "keep": [
+      {
+        "id": "keep-receipts",
+        "place": "label",
+        "path": "Talos/Keep/Receipts & invoices",
+        "when": [
+          {
+            "field": "value",
+            "in": [
+              "record_financial"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "keep-legal",
+        "place": "label",
+        "path": "Talos/Keep/Contracts & legal",
+        "when": [
+          {
+            "field": "value",
+            "in": [
+              "record_legal"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "keep-accounts",
+        "place": "label",
+        "path": "Talos/Keep/Accounts & licences",
+        "when": [
+          {
+            "field": "value",
+            "in": [
+              "record_account"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "keep-knowledge",
+        "place": "label",
+        "path": "Talos/Keep/Knowledge",
+        "when": [
+          {
+            "field": "value",
+            "in": [
+              "knowledge",
+              "decision",
+              "reference"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "keep-memories",
+        "place": "label",
+        "path": "Talos/Keep/Memories",
+        "when": [
+          {
+            "field": "value",
+            "in": [
+              "memory"
+            ]
+          }
+        ]
+      }
+    ],
+    "automated": [
+      {
+        "id": "auto-alerts",
+        "place": "label",
+        "path": "Talos/Automated/Alerts & reports",
+        "why": "Machine mail, short-lived: backups, monitoring, alarms, incidents, scheduled reports. By kind when it has one, else by type, else by origin.",
+        "when": [
+          {
+            "field": "sender",
+            "in": [
+              "machine"
+            ]
+          },
+          {
+            "use": "short_lived"
+          },
+          {
+            "field": "kind",
+            "in": [
+              "alert",
+              "report"
+            ],
+            "else": {
+              "field": "type",
+              "in": [
+                "backup",
+                "alert",
+                "security_event",
+                "alarm",
+                "incident",
+                "maintenance",
+                "report"
+              ],
+              "else": {
+                "field": "origin",
+                "in": [
+                  "alert",
+                  "system_report"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "auto-marketing",
+        "place": "label",
+        "path": "Talos/Automated/Marketing & newsletters",
+        "why": "Machine mail, short-lived: newsletters, offers, webinars, surveys, cold sales, listing alerts.",
+        "when": [
+          {
+            "field": "sender",
+            "in": [
+              "machine"
+            ]
+          },
+          {
+            "use": "short_lived"
+          },
+          {
+            "field": "kind",
+            "in": [
+              "offer",
+              "announcement"
+            ],
+            "else": {
+              "field": "type",
+              "in": [
+                "newsletter",
+                "promotion",
+                "event_webinar",
+                "survey",
+                "digest",
+                "creator_post",
+                "job_ad",
+                "sales_outreach",
+                "partner_offer",
+                "listing_alert",
+                "announcement"
+              ],
+              "else": {
+                "field": "origin",
+                "in": [
+                  "marketing"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "auto-notifications",
+        "place": "label",
+        "path": "Talos/Automated/Notifications",
+        "why": "Every other machine mail that is short-lived: account and service notices, orders and deliveries, sign-in codes, calendar replies, GitHub.",
+        "when": [
+          {
+            "field": "sender",
+            "in": [
+              "machine"
+            ]
+          },
+          {
+            "use": "short_lived"
+          }
+        ]
+      }
+    ],
+    "to-sort": [
+      {
+        "id": "to-sort",
+        "place": "label",
+        "path": "Talos/To sort",
+        "why": "Nothing above decided it: no value, no topic, or a person's mail with no area. Visible, so it can be worked through.",
+        "when": []
+      }
+    ]
+  },
+  "accounts": {
+    "gmail": {
+      "name": "Gmail",
+      "inbox": {
+        "labels": [
+          "\\Inbox"
+        ]
+      },
+      "targets": [
+        {
+          "id": "leave-sent",
+          "place": "leave",
+          "path": "Left alone: sent and drafts",
+          "why": "Your own sent mail and drafts stay where they are.",
+          "when": [
+            {
+              "any": [
+                {
+                  "field": "direction",
+                  "in": [
+                    "out"
+                  ]
+                },
+                {
+                  "field": "label",
+                  "in": [
+                    "\\Sent",
+                    "\\Draft"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "in_inbox",
+              "is": false
+            }
+          ]
+        },
+        {
+          "use": "spam"
+        },
+        {
+          "use": "inbox"
+        },
+        {
+          "use": "keep"
+        },
+        {
+          "id": "area-school-first",
+          "place": "label",
+          "path": "Talos/Areas/School",
+          "why": "School letters and school platforms are family information even when a system sends them, so they go to School before the Automated places. Offers and spam from school-related senders still go to Automated.",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "School"
+              ]
+            },
+            {
+              "field": "kind",
+              "not_in": [
+                "offer",
+                "spam"
+              ]
+            }
+          ]
+        },
+        {
+          "use": "automated"
+        },
+        {
+          "id": "area-family",
+          "place": "label",
+          "path": "Talos/Areas/Family & home",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Family",
+                "Family/Kids activities",
+                "Family/Gaming",
+                "Family/Groceries",
+                "Home",
+                "Home/Housing",
+                "Home/Utilities",
+                "Vehicle",
+                "Health"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-school",
+          "place": "label",
+          "path": "Talos/Areas/School",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "School"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-money",
+          "place": "label",
+          "path": "Talos/Areas/Money",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Finance",
+                "Finance/Bank",
+                "Finance/Payments",
+                "Insurance",
+                "Finance/Tax",
+                "Finance/Savings",
+                "Authorities"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-shopping",
+          "place": "label",
+          "path": "Talos/Areas/Shopping & marketplace",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Orders",
+                "Shopping",
+                "Shopping/Marketplace"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-music",
+          "place": "label",
+          "path": "Talos/Areas/Music",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Music",
+                "Music/Association"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-tech",
+          "place": "label",
+          "path": "Talos/Areas/Tech",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "IT services"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-work",
+          "place": "label",
+          "path": "Talos/Areas/Work-related",
+          "when": [
+            {
+              "any": [
+                {
+                  "field": "topic",
+                  "prefix": [
+                    "Work/"
+                  ]
+                },
+                {
+                  "field": "topic",
+                  "in": [
+                    "Employment"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-leisure",
+          "place": "label",
+          "path": "Talos/Areas/Leisure",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Travel",
+                "Transport",
+                "Streaming",
+                "Gaming",
+                "Culture & events",
+                "Sports & training",
+                "Food & dining",
+                "Associations",
+                "Social",
+                "Friends",
+                "Education",
+                "Photography",
+                "Newsletters"
+              ]
+            }
+          ]
+        },
+        {
+          "use": "to-sort"
+        }
+      ],
+      "old": {
+        "\\Inbox": "Inbox",
+        "Receipts": "Talos/Keep/Receipts & invoices",
+        "Family": "Talos/Areas/Family & home",
+        "Gaming-Kids": "Talos/Areas/Family & home",
+        "Home": "Talos/Areas/Family & home",
+        "Home/Utilities": "Talos/Areas/Family & home",
+        "Health": "Talos/Areas/Family & home",
+        "School": "Talos/Areas/School",
+        "Finance": "Talos/Areas/Money",
+        "Finance/Klarna": "Talos/Areas/Money",
+        "Finance/Insurance": "Talos/Areas/Money",
+        "Finance/Kivra": "Talos/Areas/Money",
+        "Finance/Bank": "Talos/Areas/Money",
+        "Authorities": "Talos/Areas/Money",
+        "Orders": "Talos/Areas/Shopping & marketplace",
+        "Orders/Amazon": "Talos/Areas/Shopping & marketplace",
+        "Blocket": "Talos/Areas/Shopping & marketplace",
+        "Streaming": "Talos/Areas/Leisure",
+        "IT services": "Talos/Areas/Tech",
+        "IT services/Apple": "Talos/Areas/Tech",
+        "IT services/Microsoft": "Talos/Areas/Tech",
+        "IT services/Google": "Talos/Areas/Tech",
+        "Employment": "Talos/Areas/Work-related",
+        "Notifications": "Talos/Automated/Notifications",
+        "Social": "Talos/Automated/Notifications",
+        "Newsletters": "Talos/Automated/Marketing & newsletters",
+        "Newsletters/Travel": "Talos/Automated/Marketing & newsletters",
+        "Newsletters/Music": "Talos/Automated/Marketing & newsletters",
+        "Newsletters/Shopping": "Talos/Automated/Marketing & newsletters",
+        "Get rid of": "Talos/Automated/Marketing & newsletters",
+        "Blocked": "Talos/Automated/Spam candidates"
+      }
+    },
+    "work": {
+      "name": "Work",
+      "inbox": {
+        "folders": [
+          "Inkorgen"
+        ]
+      },
+      "targets": [
+        {
+          "id": "leave-system",
+          "place": "leave",
+          "path": "Left alone: sent, drafts, deleted, junk",
+          "why": "Exchange's own folders (sent items, drafts, outbox, deleted items, junk, conversation history, sync conflicts) and your sent mail stay where they are.",
+          "when": [
+            {
+              "any": [
+                {
+                  "field": "direction",
+                  "in": [
+                    "out"
+                  ]
+                },
+                {
+                  "field": "folder",
+                  "in": [
+                    "Skickat",
+                    "Utkast",
+                    "Utkorg",
+                    "Borttagna objekt",
+                    "Skräppost",
+                    "Conversation History"
+                  ]
+                },
+                {
+                  "field": "folder",
+                  "prefix": [
+                    "Synkroniseringsproblem"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "in_inbox",
+              "is": false
+            }
+          ]
+        },
+        {
+          "use": "spam"
+        },
+        {
+          "use": "inbox"
+        },
+        {
+          "use": "keep"
+        },
+        {
+          "use": "automated"
+        },
+        {
+          "id": "area-it-ops",
+          "place": "label",
+          "path": "Talos/Areas/IT Operations",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/IT operations",
+                "Work/Backup",
+                "Work/Monitoring",
+                "Work/Network",
+                "Work/Remote access",
+                "Work/Devices"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-security",
+          "place": "label",
+          "path": "Talos/Areas/Security",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/Security",
+                "Work/Identity & access"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-cloud",
+          "place": "label",
+          "path": "Talos/Areas/Cloud & Platforms",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/Cloud",
+                "Work/Microsoft 365",
+                "Work/Development",
+                "Work/AI"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-costs",
+          "place": "label",
+          "path": "Talos/Areas/Costs & vendors",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/Costs & invoices",
+                "Work/Expenses",
+                "Work/Vendors",
+                "Work/Assets & licences"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-customers",
+          "place": "label",
+          "path": "Talos/Areas/Customers & Business",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/Customers",
+                "Work/FinOps product",
+                "Work/Legal & compliance",
+                "Work/Side quests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-people",
+          "place": "label",
+          "path": "Talos/Areas/People & Company",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/People & staff",
+                "Work/Company",
+                "Work/Meetings",
+                "Work/Alarm & facilities"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-learning",
+          "place": "label",
+          "path": "Talos/Areas/Learning & events",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Work/Learning & events"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area-personal",
+          "place": "label",
+          "path": "Talos/Areas/Personal",
+          "why": "Personal topics that arrived in the work mailbox (about 2,300): one folder, not seven.",
+          "when": [
+            {
+              "field": "topic",
+              "in": [
+                "Family",
+                "Family/Kids activities",
+                "Family/Gaming",
+                "Family/Groceries",
+                "School",
+                "Home",
+                "Home/Housing",
+                "Home/Utilities",
+                "Vehicle",
+                "Health",
+                "Finance",
+                "Finance/Bank",
+                "Finance/Payments",
+                "Insurance",
+                "Finance/Tax",
+                "Finance/Savings",
+                "Authorities",
+                "Orders",
+                "Shopping",
+                "Shopping/Marketplace",
+                "Music",
+                "Music/Association",
+                "Travel",
+                "Transport",
+                "Streaming",
+                "Gaming",
+                "Culture & events",
+                "Sports & training",
+                "Food & dining",
+                "Associations",
+                "Social",
+                "Friends",
+                "Education",
+                "Photography",
+                "IT services",
+                "Employment",
+                "Newsletters"
+              ]
+            }
+          ]
+        },
+        {
+          "use": "to-sort"
+        }
+      ],
+      "old": {
+        "Inbox": "Inbox",
+        "Notifications": "Talos/Automated/Notifications",
+        "Backup": "Talos/Automated/Alerts & reports",
+        "Alerts": "Talos/Automated/Alerts & reports",
+        "IT": "Talos/Areas/IT Operations",
+        "Newsletters": "Talos/Automated/Marketing & newsletters",
+        "Receipts": "Talos/Keep/Receipts & invoices",
+        "Invitations": "Talos/Areas/People & Company"
+      }
+    }
+  }
+}

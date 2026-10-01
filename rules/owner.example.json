@@ -1,0 +1,7 @@
+{
+  "note": "An example of TALOS_HOME/config/owner.json (talos.personal): who you are to Talos. id is the name your own decisions are stored under (keep it once chosen); name is how a record calls you when Jev reads mail you sent; service_prefix names the background services (<prefix>.sync, .web, .teams); sent_by_key is the record's flag for mail you sent.",
+  "id": "owner",
+  "name": "You",
+  "service_prefix": "local.talos",
+  "sent_by_key": "sent_by_you"
+}

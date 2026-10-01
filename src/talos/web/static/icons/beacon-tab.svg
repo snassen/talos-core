@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32">
+  <title>Talos</title>
+  <!-- The beacon on a dark tile. Talos Web redraws it with the lamp in the beacon's colour (beaconFavicon in app.js). -->
+  <rect width="512" height="512" rx="112" fill="#16171a"/>
+  <g transform="translate(256 262) scale(1.12) translate(-256 -266)">
+    <g fill="#6ea3ec" opacity=".6"><path d="M204 136 L70 96 L70 190 Z"/><path d="M308 136 L442 96 L442 190 Z"/></g>
+    <g fill="#f5f5f3">
+      <path d="M196 124 L256 64 L316 124 Z"/>
+      <path d="M204 124 H308 V196 H204 Z M228 146 V174 Q228 180 234 180 H278 Q284 180 284 174 V146 Q284 140 278 140 H234 Q228 140 228 146 Z" fill-rule="evenodd"/>
+      <rect x="170" y="196" width="172" height="34" rx="6"/>
+      <path d="M208 230 H304 L311 294 H201 Z M199 318 H313 L319 370 H193 Z M190 394 H322 L330 468 H182 Z"/>
+    </g>
+    <rect x="228" y="140" width="56" height="40" rx="6" fill="#6ea3ec"/>
+  </g>
+</svg>

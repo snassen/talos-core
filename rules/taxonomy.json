@@ -1,0 +1,1371 @@
+{
+  "version": 1,
+  "note": "The closed value lists for message metadata, with one-line definitions. Written 2026-09-25 for the answer key and the Jev crunch. Existing value ids are kept (rules and step A use them); new ones are added. A value's family only groups the list in the UI. Edit freely, then run: talos taxonomy load A value with \"common\": N (1 = first) is also listed in a Common group at the top of the answer key (together with the values you use most).",
+  "dimensions": {
+    "origin": {
+      "label": "Origin",
+      "cardinality": "one",
+      "description": "Who or what produced the message. The main split is person vs machine; the machine values say what kind of machine.",
+      "values": [
+        {
+          "value": "person",
+          "family": "People",
+          "label": "Person",
+          "description": "A human wrote it to you or to a group you are in, directly.",
+          "common": 2
+        },
+        {
+          "value": "person_via_system",
+          "family": "People",
+          "label": "Person via a system",
+          "description": "A human's own words delivered by a platform: a ticket reply, a LinkedIn or Blocket message, a document comment, a calendar invitation someone sent.",
+          "common": 7
+        },
+        {
+          "value": "list",
+          "family": "People",
+          "label": "Mailing list or group",
+          "description": "People writing to a list or group address (Google group, distribution list, forum digest of people's posts)."
+        },
+        {
+          "value": "auto_reply",
+          "family": "Machine",
+          "label": "Automatic reply",
+          "description": "A machine answering on a person's behalf: out of office, calendar Accepted/Declined, read receipts."
+        },
+        {
+          "value": "transactional",
+          "family": "Machine",
+          "label": "Transaction",
+          "description": "Caused by something you did or bought: receipt, order, booking, invoice, payment, login code, password reset.",
+          "common": 4
+        },
+        {
+          "value": "notification",
+          "family": "Machine",
+          "label": "Notification",
+          "description": "Routine information from a service; nothing of yours is failing: account changes, provider status and service-health notices, new followers, personal account security warnings.",
+          "common": 3
+        },
+        {
+          "value": "alert",
+          "family": "Machine",
+          "label": "Alert",
+          "description": "A system you run (monitoring, backup, alarm, your own security tooling) reports a failure, threat or threshold you may have to act on. Provider status pages, service-health notices and security warnings about your personal accounts are notification.",
+          "common": 5
+        },
+        {
+          "value": "system_report",
+          "family": "Machine",
+          "label": "Scheduled report",
+          "description": "A periodic report or digest from a system: backup summary, usage or cost report, DMARC report, weekly statistics.",
+          "common": 6
+        },
+        {
+          "value": "mail_system",
+          "family": "Machine",
+          "label": "Mail system",
+          "description": "The mail system itself: bounce or delivery failure, quarantine notice, spam digest, mailbox full."
+        },
+        {
+          "value": "marketing",
+          "family": "Machine",
+          "label": "Marketing",
+          "description": "A company promoting itself: newsletter, offer, campaign, webinar invitation, survey.",
+          "common": 1
+        },
+        {
+          "value": "spam",
+          "family": "Machine",
+          "label": "Spam or phishing",
+          "description": "Unsolicited or malicious: phishing, scams, junk you never signed up for.",
+          "common": 8
+        }
+      ]
+    },
+    "type": {
+      "label": "Type",
+      "cardinality": "one",
+      "description": "What the message is, whatever its subject.",
+      "values": [
+        {
+          "value": "conversation",
+          "family": "Conversation",
+          "label": "Discussion",
+          "description": "A back-and-forth exchange between people, with no single clear ask.",
+          "common": 4
+        },
+        {
+          "value": "question",
+          "family": "Conversation",
+          "label": "Question",
+          "description": "Someone asks for information or an opinion.",
+          "common": 5
+        },
+        {
+          "value": "request",
+          "family": "Conversation",
+          "label": "Request",
+          "description": "Someone asks for an action, a delivery or an approval.",
+          "common": 6
+        },
+        {
+          "value": "fyi",
+          "family": "Conversation",
+          "label": "For your information",
+          "description": "A person informs you; no reply is expected."
+        },
+        {
+          "value": "introduction",
+          "family": "Conversation",
+          "label": "Introduction",
+          "description": "An introduction, networking or first contact."
+        },
+        {
+          "value": "reply_thanks",
+          "family": "Conversation",
+          "label": "Short reply",
+          "description": "A brief acknowledgement: thanks, ok, received."
+        },
+        {
+          "value": "announcement",
+          "family": "Conversation",
+          "label": "Announcement",
+          "description": "One-to-many information from an organisation or a person: company news, all-staff mail, school or course information."
+        },
+        {
+          "value": "inquiry",
+          "family": "Conversation",
+          "label": "Inbound enquiry",
+          "description": "Someone contacts you or the company with an interest: a lead, a web-form request, an interest in renting or buying."
+        },
+        {
+          "value": "application",
+          "family": "Conversation",
+          "label": "Application",
+          "description": "Someone applies to you: a job or internship application, a CV, a supplier wanting to be listed."
+        },
+        {
+          "value": "invitation",
+          "family": "Calendar",
+          "label": "Meeting invitation",
+          "description": "A calendar invitation to a meeting or event."
+        },
+        {
+          "value": "calendar_response",
+          "family": "Calendar",
+          "label": "Calendar response",
+          "description": "Accepted, declined or tentative replies to an invitation."
+        },
+        {
+          "value": "calendar_update",
+          "family": "Calendar",
+          "label": "Meeting change",
+          "description": "A meeting moved, updated or cancelled."
+        },
+        {
+          "value": "meeting_notes",
+          "family": "Calendar",
+          "label": "Meeting notes",
+          "description": "Minutes, summaries, recordings or action lists after a meeting."
+        },
+        {
+          "value": "reminder",
+          "family": "Calendar",
+          "label": "Reminder",
+          "description": "A reminder of an appointment, a meeting or an event coming up."
+        },
+        {
+          "value": "receipt",
+          "family": "Money",
+          "label": "Receipt",
+          "description": "Proof of a purchase or payment already made (kvitto).",
+          "common": 7
+        },
+        {
+          "value": "invoice",
+          "family": "Money",
+          "label": "Invoice",
+          "description": "A bill to pay (faktura), or a reminder about one."
+        },
+        {
+          "value": "order",
+          "family": "Money",
+          "label": "Order confirmation",
+          "description": "An order was placed or changed.",
+          "common": 8
+        },
+        {
+          "value": "shipping",
+          "family": "Money",
+          "label": "Delivery",
+          "description": "Shipping, tracking, pickup or return of a package.",
+          "common": 9
+        },
+        {
+          "value": "booking",
+          "family": "Money",
+          "label": "Booking",
+          "description": "Travel, tickets, tables, appointments: a reservation and its changes."
+        },
+        {
+          "value": "subscription",
+          "family": "Money",
+          "label": "Subscription",
+          "description": "A plan, renewal, trial ending, price change (elpris, abonnemang) or cancellation."
+        },
+        {
+          "value": "statement",
+          "family": "Money",
+          "label": "Statement",
+          "description": "Bank, card, Klarna, pension or insurance statements and summaries."
+        },
+        {
+          "value": "payment",
+          "family": "Money",
+          "label": "Payment notice",
+          "description": "A payment went through, failed, was refunded or is due."
+        },
+        {
+          "value": "quote",
+          "family": "Money",
+          "label": "Quote or offer",
+          "description": "A vendor's quote, proposal, price list or contract offer to you."
+        },
+        {
+          "value": "sign_in",
+          "family": "Account",
+          "label": "Sign-in or code",
+          "description": "A login notice, verification code or one-time password."
+        },
+        {
+          "value": "password",
+          "family": "Account",
+          "label": "Password",
+          "description": "A password reset or change."
+        },
+        {
+          "value": "account_change",
+          "family": "Account",
+          "label": "Account change",
+          "description": "Settings changed, a new account, updated terms or privacy policy."
+        },
+        {
+          "value": "security",
+          "family": "Account",
+          "label": "Account security",
+          "description": "Suspicious activity, a breach notice, a new device on one of your accounts."
+        },
+        {
+          "value": "welcome",
+          "family": "Account",
+          "label": "Welcome or sign-up",
+          "description": "A new account, a registration to confirm, a welcome mail, a trial started."
+        },
+        {
+          "value": "policy_update",
+          "family": "Account",
+          "label": "Terms or privacy update",
+          "description": "Changed terms of use, privacy policy or data handling (personuppgifter)."
+        },
+        {
+          "value": "access_request",
+          "family": "Account",
+          "label": "Access request",
+          "description": "Someone asks to join your team or get access; an invitation to a workspace."
+        },
+        {
+          "value": "usage_notice",
+          "family": "Account",
+          "label": "Usage or quota",
+          "description": "Storage nearly full, a usage or spending threshold reached, a plan limit."
+        },
+        {
+          "value": "backup",
+          "family": "Operations",
+          "label": "Backup report",
+          "description": "A backup job's result, success or failure."
+        },
+        {
+          "value": "alert",
+          "family": "Operations",
+          "label": "Monitoring alert",
+          "description": "Uptime, performance, capacity or error alerts from monitoring."
+        },
+        {
+          "value": "security_event",
+          "family": "Operations",
+          "label": "Security event",
+          "description": "Defender, quarantine, DLP, firewall or identity-protection findings."
+        },
+        {
+          "value": "alarm",
+          "family": "Operations",
+          "label": "Alarm",
+          "description": "Physical alarms and their resets (the alarm company, burglary, fire)."
+        },
+        {
+          "value": "incident",
+          "family": "Operations",
+          "label": "Incident or outage",
+          "description": "A provider reports an outage or an incident and its updates."
+        },
+        {
+          "value": "maintenance",
+          "family": "Operations",
+          "label": "Planned maintenance",
+          "description": "Planned changes, maintenance windows, service interruptions ahead."
+        },
+        {
+          "value": "service_update",
+          "family": "Operations",
+          "label": "Service change",
+          "description": "Product or service changes, release notes, deprecations, retirements."
+        },
+        {
+          "value": "license_asset",
+          "family": "Operations",
+          "label": "Licence or asset",
+          "description": "Licences and licence keys, renewals, end of life, warranties, asset register notices (work or personal software)."
+        },
+        {
+          "value": "ticket",
+          "family": "Operations",
+          "label": "Support ticket",
+          "description": "A support case or ticket and its updates."
+        },
+        {
+          "value": "change_notice",
+          "family": "Operations",
+          "label": "Change notice",
+          "description": "A change request or change notification in someone's process (CRQ, REQ, release announcements to you)."
+        },
+        {
+          "value": "dev_notification",
+          "family": "Operations",
+          "label": "Development",
+          "description": "GitHub, CI, pull requests, issues, deploys, dependency alerts."
+        },
+        {
+          "value": "report",
+          "family": "Operations",
+          "label": "Report",
+          "description": "Usage, cost, DMARC or activity reports from a system."
+        },
+        {
+          "value": "newsletter",
+          "family": "Reading",
+          "label": "Newsletter",
+          "description": "Recurring editorial reading from an organisation or a person.",
+          "common": 3
+        },
+        {
+          "value": "promotion",
+          "family": "Reading",
+          "label": "Offer or advert",
+          "description": "An offer or campaign sent to a customer or mailing list: discounts, sales, deals, product launches, webinars with gifts. Mass promotion, even from a vendor you use.",
+          "common": 2
+        },
+        {
+          "value": "event_webinar",
+          "family": "Reading",
+          "label": "Event or webinar",
+          "description": "An invitation to a conference, webinar, fair or event (not a meeting)."
+        },
+        {
+          "value": "survey",
+          "family": "Reading",
+          "label": "Survey",
+          "description": "A feedback request, review request or questionnaire."
+        },
+        {
+          "value": "digest",
+          "family": "Reading",
+          "label": "Digest",
+          "description": "A roundup from a platform: LinkedIn, Facebook, forums, news summaries."
+        },
+        {
+          "value": "creator_post",
+          "family": "Reading",
+          "label": "Creator post",
+          "description": "A new post, release or update from a creator or artist you follow (Patreon, Gumroad, Bandcamp)."
+        },
+        {
+          "value": "job_ad",
+          "family": "Reading",
+          "label": "Job advert",
+          "description": "Job listings and job alerts, not addressed to you personally."
+        },
+        {
+          "value": "sales_outreach",
+          "family": "Selling to you",
+          "label": "Cold sales pitch",
+          "description": "A pitch aimed at you or the company as a new customer, usually asking for a meeting, a demo or a reply ('quick call?', '15 minutes this week?'), from someone you have no deal with.",
+          "common": 1
+        },
+        {
+          "value": "partner_offer",
+          "family": "Selling to you",
+          "label": "Partner or vendor offer",
+          "description": "A vendor or partner you already work with proposes something new: an upsell, a programme, a funded offer."
+        },
+        {
+          "value": "listing_alert",
+          "family": "Marketplace",
+          "label": "New listings alert",
+          "description": "New adverts matching a saved search (Blocket 'Nya annonser', Tradera bevakning)."
+        },
+        {
+          "value": "listing_message",
+          "family": "Marketplace",
+          "label": "Message about an advert",
+          "description": "A buyer or seller writes about an advert (Annonssvar, 'Angående din annons')."
+        },
+        {
+          "value": "listing_status",
+          "family": "Marketplace",
+          "label": "Advert status",
+          "description": "Your advert was received, published, expired, or its statistics."
+        },
+        {
+          "value": "auto_reply",
+          "family": "Mail system",
+          "label": "Automatic reply",
+          "description": "Out of office or another automatic answer to a mail you sent."
+        },
+        {
+          "value": "mail_notice",
+          "family": "Mail system",
+          "label": "Mail system notice",
+          "description": "Bounce or delivery failure, quarantine, junk report, mailbox or list membership notice."
+        },
+        {
+          "value": "spam",
+          "family": "Junk",
+          "label": "Spam or scam",
+          "description": "Junk you never asked for: scams, phishing, pills, fake prizes, 'personal discount' spam."
+        },
+        {
+          "value": "social",
+          "family": "Social",
+          "label": "Social activity",
+          "description": "Likes, follows, comments, mentions, friend requests on a platform."
+        },
+        {
+          "value": "document",
+          "family": "Documents",
+          "label": "Shared document",
+          "description": "A file, folder or link shared with you, or a comment on one."
+        },
+        {
+          "value": "signature",
+          "family": "Documents",
+          "label": "Signature request",
+          "description": "An e-signature request or a signed document (Scrive, DocuSign)."
+        },
+        {
+          "value": "official_letter",
+          "family": "Documents",
+          "label": "Official letter",
+          "description": "From an authority, school, healthcare, bank or insurer (often via Kivra)."
+        },
+        {
+          "value": "notification",
+          "family": "Other",
+          "label": "Other notice",
+          "description": "A routine machine notice that fits no type above."
+        },
+        {
+          "value": "other",
+          "family": "Other",
+          "label": "Other",
+          "description": "Nothing above fits."
+        }
+      ]
+    },
+    "topic": {
+      "label": "Topic",
+      "cardinality": "one",
+      "description": "What the message is about. Personal topics first, then work topics under Work/. Pick the most specific that fits.",
+      "values": [
+        {
+          "value": "Family",
+          "family": "Family & home",
+          "label": "Family",
+          "description": "Family life and relatives, when nothing more specific fits.",
+          "common": 8
+        },
+        {
+          "value": "Family/Kids activities",
+          "family": "Family & home",
+          "label": "Kids' activities",
+          "description": "The children's sports, clubs, parties and leisure."
+        },
+        {
+          "value": "Family/Gaming",
+          "family": "Family & home",
+          "label": "Kids' gaming",
+          "description": "Games, gaming accounts and purchases for the children."
+        },
+        {
+          "value": "Family/Groceries",
+          "family": "Family & home",
+          "label": "Groceries",
+          "description": "Food shopping, including Hemköp and grocery deliveries."
+        },
+        {
+          "value": "School",
+          "family": "Family & home",
+          "label": "School",
+          "description": "School, preschool and after-school: letters, meetings, reports.",
+          "common": 9
+        },
+        {
+          "value": "Home",
+          "family": "Family & home",
+          "label": "Home",
+          "description": "The home in general, when nothing more specific fits."
+        },
+        {
+          "value": "Home/Housing",
+          "family": "Family & home",
+          "label": "Housing",
+          "description": "The housing association (BRF), rent or mortgage, repairs, renovation."
+        },
+        {
+          "value": "Home/Utilities",
+          "family": "Family & home",
+          "label": "Utilities",
+          "description": "Electricity, broadband, water, waste, heating."
+        },
+        {
+          "value": "Vehicle",
+          "family": "Family & home",
+          "label": "Car and vehicle",
+          "description": "Car, service, tyres, parking, tolls, vehicle tax."
+        },
+        {
+          "value": "Health",
+          "family": "Family & home",
+          "label": "Health",
+          "description": "Healthcare, dental, pharmacy, training for health."
+        },
+        {
+          "value": "Finance",
+          "family": "Money",
+          "label": "Finance",
+          "description": "Personal finance in general."
+        },
+        {
+          "value": "Finance/Bank",
+          "family": "Money",
+          "label": "Bank",
+          "description": "Bank accounts, cards, loans."
+        },
+        {
+          "value": "Finance/Payments",
+          "family": "Money",
+          "label": "Payments and Klarna",
+          "description": "Klarna, Swish, payment services, instalments."
+        },
+        {
+          "value": "Insurance",
+          "family": "Money",
+          "label": "Insurance",
+          "description": "Insurance policies, claims, renewals."
+        },
+        {
+          "value": "Finance/Tax",
+          "family": "Money",
+          "label": "Tax",
+          "description": "Skatteverket, tax returns, deductions."
+        },
+        {
+          "value": "Finance/Savings",
+          "family": "Money",
+          "label": "Savings and pension",
+          "description": "Pension, savings, funds."
+        },
+        {
+          "value": "Authorities",
+          "family": "Money",
+          "label": "Authorities",
+          "description": "Other authorities: Försäkringskassan, Transportstyrelsen, the municipality, Kivra letters."
+        },
+        {
+          "value": "Orders",
+          "family": "Shopping",
+          "label": "Orders",
+          "description": "Online orders, receipts and deliveries when no better topic fits.",
+          "common": 6
+        },
+        {
+          "value": "Shopping",
+          "family": "Shopping",
+          "label": "Shopping",
+          "description": "Stores, products and offers you shop from.",
+          "common": 5
+        },
+        {
+          "value": "Shopping/Marketplace",
+          "family": "Shopping",
+          "label": "Marketplace",
+          "description": "Blocket, Tradera, Vendolin, vend.se: buying and selling second hand, adverts."
+        },
+        {
+          "value": "Music",
+          "family": "Leisure",
+          "label": "Music",
+          "description": "Music software, instruments, gear, licences and services.",
+          "common": 7
+        },
+        {
+          "value": "Music/Association",
+          "family": "Leisure",
+          "label": "Association",
+          "description": "A music association you are part of, and its activities."
+        },
+        {
+          "value": "Travel",
+          "family": "Leisure",
+          "label": "Travel",
+          "description": "Trips, flights, hotels, itineraries."
+        },
+        {
+          "value": "Transport",
+          "family": "Leisure",
+          "label": "Local transport",
+          "description": "Trains, SL, car sharing, taxis, e-scooters."
+        },
+        {
+          "value": "Streaming",
+          "family": "Leisure",
+          "label": "Streaming and media",
+          "description": "Netflix, Spotify, HBO, news subscriptions, podcasts."
+        },
+        {
+          "value": "Gaming",
+          "family": "Leisure",
+          "label": "Gaming",
+          "description": "Your own games, platforms and gaming purchases."
+        },
+        {
+          "value": "Culture & events",
+          "family": "Leisure",
+          "label": "Culture and events",
+          "description": "Concerts, theatre, festivals, tickets for events."
+        },
+        {
+          "value": "Sports & training",
+          "family": "Leisure",
+          "label": "Sports and training",
+          "description": "Gyms, running, sports clubs, races."
+        },
+        {
+          "value": "Food & dining",
+          "family": "Leisure",
+          "label": "Food and dining",
+          "description": "Restaurants, recipes, food delivery (not groceries)."
+        },
+        {
+          "value": "Associations",
+          "family": "Leisure",
+          "label": "Associations and clubs",
+          "description": "Clubs, non-profits and organisations you are a member of."
+        },
+        {
+          "value": "Social",
+          "family": "Leisure",
+          "label": "Social networks",
+          "description": "Facebook, Instagram, LinkedIn and similar, as platforms."
+        },
+        {
+          "value": "Friends",
+          "family": "Leisure",
+          "label": "Friends",
+          "description": "Personal contact with friends: plans, photos, catching up."
+        },
+        {
+          "value": "Education",
+          "family": "Leisure",
+          "label": "Studies and courses",
+          "description": "Your own studies and courses: university, Medborgarskolan, online courses."
+        },
+        {
+          "value": "Photography",
+          "family": "Leisure",
+          "label": "Photography",
+          "description": "Cameras, photo sites and photo services."
+        },
+        {
+          "value": "IT services",
+          "family": "Leisure",
+          "label": "Personal tech and accounts",
+          "description": "Your personal Apple, Google, Microsoft and other consumer tech accounts and devices."
+        },
+        {
+          "value": "Employment",
+          "family": "Leisure",
+          "label": "Jobs and career",
+          "description": "Job offers, recruiters, your employment, career platforms."
+        },
+        {
+          "value": "Newsletters",
+          "family": "Leisure",
+          "label": "Newsletters (general)",
+          "description": "Reading material with no clear subject above. Prefer the subject (Travel, Music, Shopping…) when there is one."
+        },
+        {
+          "value": "Work/IT operations",
+          "family": "Work",
+          "label": "IT operations",
+          "description": "Running the company's IT day to day, when nothing more specific fits.",
+          "common": 2
+        },
+        {
+          "value": "Work/Backup",
+          "family": "Work",
+          "label": "Backup",
+          "description": "Backup jobs, restores, storage for backups (NAS, Proxmox, M365 backup)."
+        },
+        {
+          "value": "Work/Monitoring",
+          "family": "Work",
+          "label": "Monitoring",
+          "description": "Uptime, performance and log monitoring (Pingplotter, Grafana, alerts)."
+        },
+        {
+          "value": "Work/Security",
+          "family": "Work",
+          "label": "Security",
+          "description": "Threats, Defender, DLP, phishing, vulnerabilities, security reviews.",
+          "common": 4
+        },
+        {
+          "value": "Work/Identity & access",
+          "family": "Work",
+          "label": "Identity and access",
+          "description": "Entra ID, accounts, MFA, permissions, onboarding and offboarding access."
+        },
+        {
+          "value": "Work/Network",
+          "family": "Work",
+          "label": "Network",
+          "description": "Firewalls, switches, Wi-Fi, DNS, DHCP (Check Point, UniFi)."
+        },
+        {
+          "value": "Work/Remote access",
+          "family": "Work",
+          "label": "Remote access and VPN",
+          "description": "VPN clients, remote access, gateways."
+        },
+        {
+          "value": "Work/Microsoft 365",
+          "family": "Work",
+          "label": "Microsoft 365",
+          "description": "Exchange, Teams, SharePoint, Intune and M365 admin."
+        },
+        {
+          "value": "Work/Cloud",
+          "family": "Work",
+          "label": "Cloud",
+          "description": "AWS, Azure and other cloud platforms."
+        },
+        {
+          "value": "Work/Development",
+          "family": "Work",
+          "label": "Development",
+          "description": "GitHub, code, CI, deployments, developer tools."
+        },
+        {
+          "value": "Work/AI",
+          "family": "Work",
+          "label": "AI",
+          "description": "AI tools, agents, models and their use at work."
+        },
+        {
+          "value": "Work/Devices",
+          "family": "Work",
+          "label": "Devices and hardware",
+          "description": "Computers, phones, peripherals, purchases and repairs."
+        },
+        {
+          "value": "Work/Assets & licences",
+          "family": "Work",
+          "label": "Assets and licences",
+          "description": "Asset register (Snipe-IT), licences, renewals, end of life."
+        },
+        {
+          "value": "Work/Costs & invoices",
+          "family": "Work",
+          "label": "Costs and invoices",
+          "description": "Supplier invoices, costs, budgets, FinOps of our own spend."
+        },
+        {
+          "value": "Work/Expenses",
+          "family": "Work",
+          "label": "Expenses to report",
+          "description": "Receipts to report, expense claims (Kvitton att rapportera)."
+        },
+        {
+          "value": "Work/Vendors",
+          "family": "Work",
+          "label": "Vendors and partners",
+          "description": "Suppliers, partners, resellers and their sales contact.",
+          "common": 1
+        },
+        {
+          "value": "Work/Customers",
+          "family": "Work",
+          "label": "Customers",
+          "description": "Customer work and customer contact.",
+          "common": 3
+        },
+        {
+          "value": "Work/FinOps product",
+          "family": "Work",
+          "label": "FinOps product",
+          "description": "The FinOps offering and product we build and sell."
+        },
+        {
+          "value": "Work/Alarm & facilities",
+          "family": "Work",
+          "label": "Alarm and office",
+          "description": "The alarm company, the office, keys, premises."
+        },
+        {
+          "value": "Work/People & staff",
+          "family": "Work",
+          "label": "People and staff",
+          "description": "Colleagues, HR, recruitment, staff augmentation, onboarding."
+        },
+        {
+          "value": "Work/Company",
+          "family": "Work",
+          "label": "Company and internal",
+          "description": "Company news, all-hands, internal information, management."
+        },
+        {
+          "value": "Work/Meetings",
+          "family": "Work",
+          "label": "Meetings and planning",
+          "description": "Meeting logistics and planning with no clearer subject."
+        },
+        {
+          "value": "Work/Learning & events",
+          "family": "Work",
+          "label": "Learning and events",
+          "description": "Training, certifications, conferences, webinars for work."
+        },
+        {
+          "value": "Work/Legal & compliance",
+          "family": "Work",
+          "label": "Legal and compliance",
+          "description": "Contracts, DPAs, GDPR, PCI, audits, policies."
+        },
+        {
+          "value": "Work/Side quests",
+          "family": "Work",
+          "label": "Side quests",
+          "description": "Side projects and workshops outside the core job (GTL workshops and similar)."
+        }
+      ]
+    },
+    "ask": {
+      "label": "Ask",
+      "cardinality": "many",
+      "description": "What the message expects of you, or promises you made. Empty when nothing is asked.",
+      "values": [
+        {
+          "value": "question",
+          "family": "Asked of you",
+          "label": "Question to you",
+          "description": "Someone asks you for information or an opinion.",
+          "common": 1
+        },
+        {
+          "value": "action",
+          "family": "Asked of you",
+          "label": "Action for you",
+          "description": "Someone asks you to do, send or fix something.",
+          "common": 2
+        },
+        {
+          "value": "decision",
+          "family": "Asked of you",
+          "label": "Decision or approval",
+          "description": "Someone needs your decision, approval or signature, or a decision was just made that you must know about (a completed signature on an order form)."
+        },
+        {
+          "value": "deadline",
+          "family": "Asked of you",
+          "label": "Deadline",
+          "description": "It carries a date by which you must act (a due date, an expiry)."
+        },
+        {
+          "value": "my_commitment",
+          "family": "Your promises",
+          "label": "Your promise",
+          "description": "You promised to do something (\"I'll fix it\", \"jag kollar\")."
+        }
+      ]
+    },
+    "value": {
+      "label": "Value",
+      "cardinality": "one",
+      "description": "How worth keeping and finding again the message is.",
+      "values": [
+        {
+          "value": "knowledge",
+          "family": "Keep and find",
+          "label": "Knowledge",
+          "description": "Explains how or why: an answer, a how-to, specifications, an analysis worth finding again.",
+          "common": 5
+        },
+        {
+          "value": "decision",
+          "family": "Keep and find",
+          "label": "Decision",
+          "description": "Records a decision or an agreement."
+        },
+        {
+          "value": "reference",
+          "family": "Keep and find",
+          "label": "Reference",
+          "description": "Manuals, documentation, product details, price lists, contact details.",
+          "common": 6
+        },
+        {
+          "value": "record_financial",
+          "family": "Records",
+          "label": "Financial record",
+          "description": "Receipts, invoices, statements: keep for bookkeeping and tax.",
+          "common": 4
+        },
+        {
+          "value": "record_legal",
+          "family": "Records",
+          "label": "Legal record",
+          "description": "Contracts, signed terms, warranties, official letters."
+        },
+        {
+          "value": "record_account",
+          "family": "Records",
+          "label": "Account record",
+          "description": "Account setup, licence keys, serial numbers, subscriptions: handy to find later."
+        },
+        {
+          "value": "memory",
+          "family": "Records",
+          "label": "Memory",
+          "description": "Personal value: family, friends, photos, milestones."
+        },
+        {
+          "value": "context",
+          "family": "Short-lived",
+          "label": "Context",
+          "description": "Part of a real conversation or decision thread that you may need to follow later; not routine chat.",
+          "common": 3
+        },
+        {
+          "value": "transient",
+          "family": "Short-lived",
+          "label": "Transient",
+          "description": "Read once or not at all, no lasting value: marketing and newsletters you signed up for, codes, delivery updates, routine notices and reports, chat that only moves the day along.",
+          "common": 2
+        },
+        {
+          "value": "noise",
+          "family": "Short-lived",
+          "label": "Noise",
+          "description": "Junk only: spam, scams, phishing and mail you never asked for.",
+          "common": 1
+        }
+      ]
+    },
+    "route": {
+      "label": "Route",
+      "cardinality": "many",
+      "description": "Which work category the message belongs to, for finding it from a binder. Top level only. Empty when it is not work, and for automatic replies.",
+      "values": [
+        {
+          "value": "IT Operations",
+          "family": "Areas",
+          "label": "IT Operations",
+          "description": "Running and maintaining IT: backup, monitoring, servers, Microsoft 365 admin.",
+          "common": 1
+        },
+        {
+          "value": "Security",
+          "family": "Areas",
+          "label": "Security",
+          "description": "Security tooling, threats, alarms, compliance, identity protection.",
+          "common": 2
+        },
+        {
+          "value": "Costs",
+          "family": "Areas",
+          "label": "Costs",
+          "description": "Costs, invoices, licences, subscriptions and vendors' prices.",
+          "common": 3
+        },
+        {
+          "value": "Devices & Hardware",
+          "family": "Areas",
+          "label": "Devices & Hardware",
+          "description": "Computers, phones, network hardware, purchases and end of life."
+        },
+        {
+          "value": "Admin Toolbox",
+          "family": "Areas",
+          "label": "Admin Toolbox",
+          "description": "Admin tools and routines: scripts, asset register, how-tos for administration."
+        },
+        {
+          "value": "Side Quests",
+          "family": "Areas",
+          "label": "Side Quests",
+          "description": "Side projects and workshops outside the core job."
+        },
+        {
+          "value": "AI Tooling",
+          "family": "Topics",
+          "label": "AI Tooling",
+          "description": "AI tools, agents and models."
+        },
+        {
+          "value": "Remote Access",
+          "family": "Topics",
+          "label": "Remote Access",
+          "description": "VPN, remote access and gateways."
+        },
+        {
+          "value": "Cloud & Platforms",
+          "family": "Other areas",
+          "label": "Cloud & Platforms",
+          "description": "AWS, Azure, GitHub and other platforms we run on."
+        },
+        {
+          "value": "Network",
+          "family": "Other areas",
+          "label": "Network",
+          "description": "Firewalls, switches, Wi-Fi, DNS, DHCP and RADIUS."
+        },
+        {
+          "value": "Identity & Access",
+          "family": "Other areas",
+          "label": "Identity & Access",
+          "description": "Accounts, MFA, permissions, onboarding and offboarding."
+        },
+        {
+          "value": "Customers & Business",
+          "family": "Other areas",
+          "label": "Customers & Business",
+          "description": "Customer work, sales, the FinOps product, business development.",
+          "common": 4
+        },
+        {
+          "value": "People & Staff",
+          "family": "Other areas",
+          "label": "People & Staff",
+          "description": "Colleagues, HR, recruitment, staff augmentation."
+        },
+        {
+          "value": "Company & Internal",
+          "family": "Other areas",
+          "label": "Company & Internal",
+          "description": "Company news, management, internal routines."
+        },
+        {
+          "value": "Learning & Events",
+          "family": "Other areas",
+          "label": "Learning & Events",
+          "description": "Training, conferences, webinars, certifications."
+        }
+      ]
+    },
+    "sender_kind": {
+      "label": "Sender",
+      "cardinality": "one",
+      "description": "Who produced the message, a human or a machine: the line that is costly to get wrong. Derived from origin.",
+      "derived_from": {
+        "dimension": "origin",
+        "families": {
+          "People": "people",
+          "Machine": "machine"
+        }
+      },
+      "values": [
+        {
+          "value": "people",
+          "family": "Sender",
+          "label": "People",
+          "description": "A human wrote this (to you or to a group you are in), including a person via a platform (a ticket reply, a LinkedIn or Blocket message, a document comment) and people writing to a list."
+        },
+        {
+          "value": "machine",
+          "family": "Sender",
+          "label": "Automated",
+          "description": "A machine or a company system produced it: receipts, notifications, alerts, scheduled reports, marketing, automatic replies, bounces and spam."
+        }
+      ]
+    },
+    "sphere": {
+      "label": "Work or personal",
+      "cardinality": "one",
+      "description": "Whether the message belongs to your work or to your personal life. Derived from topic: the Work/ topics are work.",
+      "derived_from": {
+        "dimension": "topic",
+        "families": {
+          "Work": "work",
+          "Family & home": "personal",
+          "Money": "personal",
+          "Shopping": "personal",
+          "Leisure": "personal"
+        }
+      },
+      "values": [
+        {
+          "value": "work",
+          "family": "Sphere",
+          "label": "Work",
+          "description": "Your work: IT operations, security, customers, vendors, colleagues, costs, the company."
+        },
+        {
+          "value": "personal",
+          "family": "Sphere",
+          "label": "Personal",
+          "description": "Your own life: family, home, money, shopping, leisure, travel and your personal accounts."
+        }
+      ]
+    },
+    "form": {
+      "label": "Conversation or other",
+      "cardinality": "one",
+      "description": "Whether the message is a conversation with people or something else. Derived from type: the Conversation family is conversation.",
+      "derived_from": {
+        "dimension": "type",
+        "families": {
+          "Conversation": "conversation",
+          "Calendar": "other",
+          "Money": "other",
+          "Account": "other",
+          "Operations": "other",
+          "Reading": "other",
+          "Selling to you": "other",
+          "Marketplace": "other",
+          "Mail system": "other",
+          "Junk": "other",
+          "Social": "other",
+          "Documents": "other",
+          "Other": "other"
+        }
+      },
+      "values": [
+        {
+          "value": "conversation",
+          "family": "Form",
+          "label": "Conversation",
+          "description": "Someone writing to you or with you: a conversation, a question, a request, an FYI, a reply or thanks, an introduction, an announcement, an inquiry or an application."
+        },
+        {
+          "value": "other",
+          "family": "Form",
+          "label": "Other",
+          "description": "Everything that is not a conversation: calendar mail, money, accounts, operations, reading, selling, marketplace, system mail, documents."
+        }
+      ]
+    },
+    "keep": {
+      "label": "Worth keeping",
+      "cardinality": "one",
+      "description": "Whether the message is worth keeping or short-lived. Derived from value: Keep and find, and Records, are worth keeping.",
+      "derived_from": {
+        "dimension": "value",
+        "families": {
+          "Keep and find": "keep",
+          "Records": "keep",
+          "Short-lived": "short_lived"
+        }
+      },
+      "values": [
+        {
+          "value": "keep",
+          "family": "Keep",
+          "label": "Worth keeping",
+          "description": "Worth keeping and finding again: knowledge, decisions, references, and records (financial, legal, account, memories)."
+        },
+        {
+          "value": "short_lived",
+          "family": "Keep",
+          "label": "Short-lived",
+          "description": "Useful for a while or not at all: context for something current, transient notices, noise."
+        }
+      ]
+    },
+    "kind": {
+      "label": "Kind",
+      "cardinality": "one",
+      "description": "What the message is to you, in one coarse word: how you read mail, for filters and the mailbox structure. The level above type: every type belongs to one kind (derived_from), and Jev can also be asked it directly.",
+      "derived_from": {
+        "dimension": "type",
+        "values": {
+          "conversation": [
+            "conversation",
+            "introduction",
+            "reply_thanks",
+            "listing_message",
+            "document"
+          ],
+          "question_request": [
+            "question",
+            "request",
+            "inquiry",
+            "application",
+            "access_request",
+            "signature"
+          ],
+          "invitation": [
+            "invitation",
+            "calendar_update"
+          ],
+          "fyi": [
+            "fyi",
+            "calendar_response",
+            "meeting_notes",
+            "reminder",
+            "subscription",
+            "sign_in",
+            "password",
+            "account_change",
+            "welcome",
+            "policy_update",
+            "maintenance",
+            "service_update",
+            "license_asset",
+            "ticket",
+            "change_notice",
+            "dev_notification",
+            "social",
+            "listing_status",
+            "auto_reply",
+            "mail_notice",
+            "official_letter",
+            "notification"
+          ],
+          "announcement": [
+            "announcement",
+            "newsletter",
+            "event_webinar",
+            "digest",
+            "creator_post",
+            "survey"
+          ],
+          "alert": [
+            "alert",
+            "security_event",
+            "alarm",
+            "incident",
+            "security",
+            "usage_notice"
+          ],
+          "report": [
+            "backup",
+            "report"
+          ],
+          "offer": [
+            "promotion",
+            "sales_outreach",
+            "partner_offer",
+            "quote",
+            "job_ad",
+            "listing_alert"
+          ],
+          "transaction": [
+            "receipt",
+            "invoice",
+            "order",
+            "shipping",
+            "booking",
+            "payment",
+            "statement"
+          ],
+          "spam": [
+            "spam"
+          ],
+          "other": [
+            "other"
+          ]
+        }
+      },
+      "values": [
+        {
+          "value": "conversation",
+          "family": "People",
+          "label": "Conversation",
+          "description": "People writing with you, and nothing in particular asked: a discussion, a reply or a thank-you, a chat, a message about an advert, a document someone shared or commented on."
+        },
+        {
+          "value": "question_request",
+          "family": "People",
+          "label": "Question or request",
+          "description": "Someone asks you something or asks you to act: a question, a request, an approval or signature, an enquiry or lead, an application, a request for access."
+        },
+        {
+          "value": "invitation",
+          "family": "People",
+          "label": "Invitation",
+          "description": "An invitation to a meeting or appointment you are expected at, or a change to one. Not a mass event invitation: that is an announcement."
+        },
+        {
+          "value": "fyi",
+          "family": "Notices",
+          "label": "FYI",
+          "description": "Something you may want to know about your own things, no reply needed: a renewal, a resolved ticket, an update to software or a service you use, an account or sign-in notice, a reminder, a person keeping you posted."
+        },
+        {
+          "value": "announcement",
+          "family": "Notices",
+          "label": "Announcement",
+          "description": "News sent to many, from an organisation or a person: a release or launch, a newsletter or digest, an event or webinar, company or school news, a creator's new post, a survey."
+        },
+        {
+          "value": "alert",
+          "family": "Notices",
+          "label": "Alert",
+          "description": "Something may be wrong and needs a look soon: a monitoring alarm, an outage, a security warning, a limit reached."
+        },
+        {
+          "value": "report",
+          "family": "Notices",
+          "label": "Report",
+          "description": "A system's regular account of how things went: backup results, usage, cost or DMARC reports."
+        },
+        {
+          "value": "offer",
+          "family": "Money",
+          "label": "Offer",
+          "description": "Someone wants to sell you something: a campaign or discount, a cold pitch, a partner's proposal, a quote, new adverts or jobs matching a search."
+        },
+        {
+          "value": "transaction",
+          "family": "Money",
+          "label": "Transaction",
+          "description": "A purchase or payment in motion: a receipt, an invoice, an order, a delivery, a booking, a payment, a statement."
+        },
+        {
+          "value": "spam",
+          "family": "Other",
+          "label": "Spam",
+          "description": "Junk you never asked for: scams, phishing, fake prizes."
+        },
+        {
+          "value": "other",
+          "family": "Other",
+          "label": "Other",
+          "description": "None of the above fits."
+        }
+      ]
+    }
+  }
+}

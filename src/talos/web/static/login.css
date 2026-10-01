@@ -1,0 +1,13 @@
+/* The sign-in page: one card in the middle, the app's own tokens. */
+.login-body { min-height: 100vh; display: grid; place-items: center; background: var(--plane); margin: 0; padding: 16px; }
+.login-card { width: min(380px, 100%); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 28px 26px 20px; display: flex; flex-direction: column; gap: 4px; }
+.login-mark { width: 72px; height: 72px; align-self: center; }  /* the beacon, as in the rail */
+.login-card h1 { text-align: center; margin: 6px 0 0; }
+.login-sub { text-align: center; color: var(--text-secondary); margin: 2px 0 14px; font-size: 14px; }
+.login-card form { display: flex; flex-direction: column; gap: 6px; }
+.login-card .field { width: 100%; box-sizing: border-box; }
+.login-card .btn { margin-top: 10px; justify-content: center; }
+.login-msg { min-height: 1.4em; font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+.login-msg.bad { color: var(--critical-ink); }
+.login-foot { font-size: 12px; color: var(--text-muted); text-align: center; margin: 14px 0 0; }

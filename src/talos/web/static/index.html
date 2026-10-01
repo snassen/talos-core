@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talos</title>
+<link rel="icon" href="/static/icons/beacon-tab.ico" sizes="32x32">
+<link rel="icon" href="/static/icons/beacon-tab-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/static/icons/beacon-tab.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icons/beacon-touch-180.png" sizes="180x180">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Talos">
+<meta name="theme-color" content="#f8f8f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0e0d" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="/static/style.css">
+<script>
+  try { var L = JSON.parse(localStorage.getItem('talos-look') || '{}') || {}, r = document.documentElement, t = L.mode || localStorage.getItem('talos-theme');
+    if (t === 'light' || t === 'dark') r.setAttribute('data-theme', t);
+    ['preset', 'accent', 'size', 'headings', 'density', 'corners', 'marker', 'motion', 'tint', 'controls'].forEach(function (k) { if (L[k] != null && L[k] !== '') r.setAttribute('data-' + k, String(L[k])); }); } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<div class="app">
+  <nav class="rail" id="rail" aria-label="Views"></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<noscript><p style="padding:40px">Talos needs JavaScript. The same data is available from the talos command.</p></noscript>
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

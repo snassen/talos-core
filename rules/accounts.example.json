@@ -1,0 +1,85 @@
+{
+  "note": "An example of TALOS_HOME/config/accounts.json (talos.accounts): the accounts Talos syncs, and every address that is 'me'. Copy it there and fill in your own; no secrets go here (each account names its Keychain item). Optional per account: jev_label (how a record names the account to Jev), sphere (work or personal, for compose's warnings) and ui (name, letter, color 1-7 or other, ink, order: how the web shows it).",
+  "accounts": [
+    {
+      "id": "gmail",
+      "provider": "gmail",
+      "address": "owner@gmail.com",
+      "display_name": "Gmail",
+      "enabled": true,
+      "jev_label": "personal Gmail",
+      "sphere": "personal",
+      "settings": {
+        "secret": "gmail:owner@gmail.com"
+      }
+    },
+    {
+      "id": "work",
+      "provider": "graph",
+      "address": "owner@company.example",
+      "display_name": "Work",
+      "enabled": true,
+      "jev_label": "work mail",
+      "sphere": "work",
+      "settings": {
+        "tenant_id": "00000000-0000-0000-0000-000000000000",
+        "client_id": "00000000-0000-0000-0000-000000000001"
+      }
+    },
+    {
+      "id": "icloud",
+      "provider": "imap",
+      "address": "owner@icloud.example",
+      "display_name": "iCloud",
+      "enabled": false,
+      "sphere": "personal",
+      "settings": {
+        "host": "imap.mail.me.com",
+        "secret": "imap:owner@icloud.example"
+      }
+    },
+    {
+      "id": "club",
+      "provider": "imap",
+      "address": "admin@club.example",
+      "display_name": "Club",
+      "enabled": false,
+      "settings": {
+        "host": "imap.club.example",
+        "secret": "imap:admin@club.example"
+      }
+    },
+    {
+      "id": "teams",
+      "provider": "teams",
+      "address": "owner@company.example",
+      "display_name": "Teams",
+      "enabled": false,
+      "jev_label": "work Teams",
+      "settings": {
+        "tenant_id": "00000000-0000-0000-0000-000000000000",
+        "client_id": "00000000-0000-0000-0000-000000000001",
+        "token_account": "work",
+        "secret": "graph-token-cache:work"
+      }
+    },
+    {
+      "id": "local",
+      "provider": "local",
+      "address": "local@talos.invalid",
+      "display_name": "Imported files",
+      "enabled": false,
+      "jev_label": "imported mail",
+      "ui": {"name": "Imported", "color": "other"},
+      "settings": {}
+    }
+  ],
+  "my_addresses": {
+    "owner@gmail.com": "gmail",
+    "owner@company.example": "work",
+    "o@company.example": "work",
+    "owner@icloud.example": "icloud",
+    "admin@club.example": "club",
+    "owner@second-tenant.example": null
+  }
+}

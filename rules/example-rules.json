@@ -1,0 +1,660 @@
+{
+  "version": "2026-09-27",
+  "note": "An example rule set (talos.rules), in the shape of a researched rule set: twenty rules, one dimension each, rules of one intent sharing an id prefix. Your own rules live in TALOS_HOME/config/rules (talos.personal); the senders and hosts here are invented (company.example, customer.example). Load: talos rules load rules/example-rules.json",
+  "rules": [
+    {
+      "id": "backup.failed-alert",
+      "name": "A failed backup is an alert",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "in",
+          "value": [
+            "itrobot@company.example",
+            "backupalert@company.example",
+            "alert@company.example",
+            "veeam@company.example",
+            "veeam01@company.example",
+            "veeamalert@company.example",
+            "nas1@company.example",
+            "nas2@company.example",
+            "nas3@company.example"
+          ]
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "^\\s*\\[Failed\\]|(säkerhetskopiering|återställning|Active Backup|Hyper Backup|Network backup|backup).*(misslyckades|har misslyckats|har avbrutits)"
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "alert"
+      },
+      "priority": 10,
+      "enabled": false,
+      "description": "Why: a backup that failed is the one backup mail that asks for a look, yet Jev tends to file NAS backup failures ('misslyckades', 'har avbrutits') as reports alongside the daily successes. Status-aware: the subject says [Failed] (Veeam) or misslyckades/avbrutits (Synology Active Backup, Hyper Backup, Network backup), from the backup robots only. The disagreements with Jev are NAS failures, sent directly or relayed by itrobot@, that Jev called report. Off: it overrides Jev on part of the overlap, so it needs your look first. Precision by inspection of the disagreements: every one is a failed or aborted job."
+    },
+    {
+      "id": "backup.done-report",
+      "name": "A finished backup is a report",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "in",
+          "value": [
+            "itrobot@company.example",
+            "backupalert@company.example",
+            "alert@company.example",
+            "veeam@company.example",
+            "veeam01@company.example",
+            "veeamalert@company.example",
+            "nas1@company.example",
+            "nas2@company.example",
+            "nas3@company.example"
+          ]
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "^\\s*\\[Success\\]|(säkerhetskopiering|Active Backup|Hyper Backup|Network backup).*(slutfördes|har slutförts|lyckades)"
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "report"
+      },
+      "priority": 11,
+      "enabled": true,
+      "description": "Why: most backup mail says a job finished, and that is a report to glance at, not an alert. Status-aware counterpart of backup.failed-alert: [Success] (Veeam) or slutfördes/slutförts/lyckades (Synology; 'slutfördes delvis', a daily partial Microsoft 365 backup on a NAS, counts as done). Jev agrees on almost every accepted value it shares with this rule, so the rule only makes the answer deterministic and free for new mail. On."
+    },
+    {
+      "id": "backup.topic",
+      "name": "Backup job mail is Work/Backup",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "in",
+          "value": [
+            "itrobot@company.example",
+            "backupalert@company.example",
+            "alert@company.example",
+            "veeam@company.example",
+            "veeam01@company.example",
+            "veeamalert@company.example",
+            "nas1@company.example",
+            "nas2@company.example",
+            "nas3@company.example"
+          ]
+        },
+        {
+          "any": [
+            {
+              "field": "subject",
+              "op": "matches",
+              "value": "^\\s*\\[Failed\\]|(säkerhetskopiering|återställning|Active Backup|Hyper Backup|Network backup|backup).*(misslyckades|har misslyckats|har avbrutits)"
+            },
+            {
+              "field": "subject",
+              "op": "matches",
+              "value": "^\\s*\\[Success\\]|(säkerhetskopiering|Active Backup|Hyper Backup|Network backup).*(slutfördes|har slutförts|lyckades)"
+            },
+            {
+              "field": "subject",
+              "op": "matches",
+              "value": "^\\s*\\[Warning\\]"
+            }
+          ]
+        }
+      ],
+      "action": {
+        "dimension": "topic",
+        "value": "Work/Backup"
+      },
+      "priority": 12,
+      "enabled": true,
+      "description": "Why: every backup job result belongs under Work/Backup whatever its status, so the backup story reads in one place across Veeam and the Synology NAS boxes (nas1, nas2, nas3). Conditions: a backup robot and a job status ([Success]/[Warning]/[Failed], slutfördes, misslyckades…). Jev agrees on nearly all of the accepted values it shares with this rule (the few others say Work/Assets & licences), and the answer-key items that match agree too. On."
+    },
+    {
+      "id": "uptime.down-alert",
+      "name": "A site DOWN is an alert",
+      "conditions": [
+        {
+          "any": [
+            [
+              {
+                "field": "from_address",
+                "op": "is",
+                "value": "alert@pingdom.com"
+              },
+              {
+                "field": "subject",
+                "op": "starts_with",
+                "value": "DOWN alert"
+              }
+            ],
+            [
+              {
+                "field": "from_address",
+                "op": "is",
+                "value": "itrobot@company.example"
+              },
+              {
+                "field": "subject",
+                "op": "matches",
+                "value": "\\sDown!$"
+              }
+            ]
+          ]
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "alert"
+      },
+      "priority": 10,
+      "enabled": true,
+      "description": "Why: a site that is down is the clearest alert there is. Pingdom 'DOWN alert: …' and the itrobot relays of the office monitor ('<host> Down!', for example grafana.company.example or tableau.customer.example). An OR of two sender-and-subject pairs. Jev agrees on every accepted value it shares with this rule, so turning it on changes nothing today and makes new mail deterministic. On."
+    },
+    {
+      "id": "uptime.up-fyi",
+      "name": "A site back UP is for your information",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "alert@pingdom.com"
+        },
+        {
+          "field": "subject",
+          "op": "starts_with",
+          "value": "UP alert"
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "fyi"
+      },
+      "priority": 10,
+      "enabled": false,
+      "description": "Why: 'UP alert' closes a DOWN alert; it is good news to note, not something to act on, so it belongs with fyi and should not keep the Alerts list busy. No accepted Jev value overlaps, and Jev proposes (not accepted) alert for all of these messages. Off: it contradicts Jev's proposals, so it needs your look before it is switched on."
+    },
+    {
+      "id": "m365-health.open-alert",
+      "name": "An open Microsoft 365 incident is an alert",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "o365mc@microsoft.com"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "Service Health Incident \\((Service Degradation|Investigating|Restoring Service|Extended Recovery)\\)"
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "alert"
+      },
+      "priority": 10,
+      "enabled": true,
+      "description": "Why: Microsoft 365 is the company's mail and Teams; an open incident (Service Degradation, Investigating, Restoring Service, Extended Recovery) may explain what users are reporting right now. Microsoft's message center puts the status in brackets in the subject, which makes the rule exact. Jev agrees on every accepted value it shares with this rule. On."
+    },
+    {
+      "id": "m365-health.closed-fyi",
+      "name": "A closed Microsoft 365 incident is for your information",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "o365mc@microsoft.com"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "Service Health Incident \\((Service Restored|Post-Incident Report Published|False Positive|Investigation Suspended)\\)"
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "fyi"
+      },
+      "priority": 10,
+      "enabled": false,
+      "description": "Why: the same incident's closing mail (Service Restored, Post-Incident Report Published, False Positive, Investigation Suspended) needs no action, and marking it alert doubles the noise of every incident. Jev calls every incident mail alert, closing ones too, so this rule disagrees with all of its accepted values. Off: it overrides accepted Jev values, so it needs your look; advisories and older incidents without a status are left to Jev."
+    },
+    {
+      "id": "azure.cost-anomaly-alert",
+      "name": "An Azure cost anomaly is an alert",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "microsoft-noreply@microsoft.com"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "^\\s*Cost anomaly"
+        }
+      ],
+      "action": {
+        "dimension": "kind",
+        "value": "alert"
+      },
+      "priority": 10,
+      "enabled": true,
+      "description": "Why: an Azure cost anomaly ('Cost anomaly detected in Development') is money leaking in a subscription you run, and it should stand out among the many other Azure notices that only inform. Jev agrees on every accepted value it shares with this rule, so it only makes the answer deterministic and free for new mail. On."
+    },
+    {
+      "id": "mail.system-origin",
+      "name": "Quarantine notices and bounces come from the mail system",
+      "conditions": [
+        {
+          "field": "direction",
+          "op": "is",
+          "value": "in"
+        },
+        {
+          "any": [
+            {
+              "field": "from_address",
+              "op": "is",
+              "value": "quarantine@messaging.microsoft.com"
+            },
+            {
+              "field": "from_address",
+              "op": "matches",
+              "value": "^(mailer-daemon|postmaster)@"
+            },
+            {
+              "field": "subject",
+              "op": "matches",
+              "value": "^\\s*(Undeliverable|Olevererbart|Delivery Status Notification \\((Failure|Delay)\\)|Mail delivery failed|Returned mail)"
+            }
+          ]
+        }
+      ],
+      "action": {
+        "dimension": "origin",
+        "value": "mail_system"
+      },
+      "priority": 10,
+      "enabled": true,
+      "description": "Why: quarantine notices ('You have messages in quarantine') and bounces (Undeliverable, Olevererbart, mailer-daemon, postmaster) are the mail system talking, not a person or a vendor; the discovery register lists the quarantine notices as tenant noise. Jev agrees on almost every accepted value it shares with this rule, and the matching answer-key items agree too. On."
+    },
+    {
+      "id": "mail.auto-reply-origin",
+      "name": "Out-of-office answers are automatic replies",
+      "conditions": [
+        {
+          "field": "direction",
+          "op": "is",
+          "value": "in"
+        },
+        {
+          "any": [
+            {
+              "field": "subject",
+              "op": "matches",
+              "value": "^\\s*(Automatic reply|Autosvar|Automatiskt svar|Out of Office|Frånvaro|Frånvarande)\\s*:"
+            },
+            {
+              "field": "header:auto-submitted",
+              "op": "is",
+              "value": "auto-replied"
+            }
+          ]
+        }
+      ],
+      "action": {
+        "dimension": "origin",
+        "value": "auto_reply"
+      },
+      "priority": 11,
+      "enabled": false,
+      "description": "Why: an out-of-office answer is a machine speaking for a person; filed as person it pollutes 'people who wrote to me'. Subject prefixes Automatic reply / Autosvar / Automatiskt svar / Out of Office / Frånvaro, or the header Auto-Submitted: auto-replied. Where Jev disagrees it said person for 'Automatic reply:'/'Autosvar:' mail from colleagues (checked by hand): the rule is right and Jev wrong there. Off only because its agreement with Jev is below 95%."
+    },
+    {
+      "id": "github.deploy-review-type",
+      "name": "GitHub deployment reviews are dev notifications",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "notifications@github.com"
+        },
+        {
+          "field": "subject",
+          "op": "starts_with",
+          "value": "Deployment review in "
+        }
+      ],
+      "action": {
+        "dimension": "type",
+        "value": "dev_notification"
+      },
+      "priority": 20,
+      "enabled": true,
+      "description": "Why: GitHub's 'Deployment review in <org>/<repo>' mails can be the largest single source of work mail, and they are pure CI plumbing. Deterministic here, they no longer wait for Jev on new mail. Jev agrees on every accepted value it shares with this rule, and the matching answer-key item agrees. On."
+    },
+    {
+      "id": "customer.crq-type",
+      "name": "the customer CRQ notices are change notices",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "matches",
+          "value": "^(mgsnotifications|[a-z]+comms)@customer\\.example$"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "\\mCRQ[0-9]{5,}"
+        }
+      ],
+      "action": {
+        "dimension": "type",
+        "value": "change_notice"
+      },
+      "priority": 20,
+      "enabled": true,
+      "description": "Why: a big customer's change process speaks in CRQ numbers (release notes, Windows patching, certificate changes). Only the customer's comms senders (mgsnotifications@, *comms@customer.example) with a CRQ number, so a person's CRQ discussion stays a conversation. Jev agrees on every accepted value it shares with this rule, and the matching answer-key items agree. On."
+    },
+    {
+      "id": "unifi-gmail.sphere",
+      "name": "UniFi notices at Gmail are work",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "no-reply@notifications.ui.com"
+        }
+      ],
+      "action": {
+        "dimension": "sphere",
+        "value": "work"
+      },
+      "priority": 20,
+      "enabled": true,
+      "description": "Why: a company UniFi site (and its camera) can send its notices to a private Gmail address; by account they would look personal, though they are work. Jev agrees on every accepted value it shares with this rule and proposes work for the rest, so the rule settles them at once and for new mail too. On."
+    },
+    {
+      "id": "unifi-gmail.topic",
+      "name": "UniFi notices at Gmail are Work/Network",
+      "conditions": [
+        {
+          "field": "from_address",
+          "op": "is",
+          "value": "no-reply@notifications.ui.com"
+        }
+      ],
+      "action": {
+        "dimension": "topic",
+        "value": "Work/Network"
+      },
+      "priority": 20,
+      "enabled": true,
+      "description": "Why: the same UniFi notices (Network Accessed, Admin Accessed UniFi Network, Config Modified, camera motion) are Work/Network, next to the firewall and DNS. Pairs with unifi-gmail.sphere. Jev agrees on every accepted value it shares with this rule, so it only makes the answer deterministic and free for new mail. On."
+    },
+    {
+      "id": "approvals.decision",
+      "name": "Supplier invoices and expenses waiting for your approval",
+      "conditions": [
+        {
+          "any": [
+            [
+              {
+                "field": "from_address",
+                "op": "is",
+                "value": "noreply@fortnox.se"
+              },
+              {
+                "field": "subject",
+                "op": "matches",
+                "value": "leverantörsfakturor att hantera|Utebliven attest"
+              }
+            ],
+            [
+              {
+                "field": "from_address",
+                "op": "is",
+                "value": "noreply@findity.com"
+              },
+              {
+                "field": "subject",
+                "op": "matches",
+                "value": "^\\s*Ett nytt utlägg väntar"
+              }
+            ]
+          ]
+        }
+      ],
+      "action": {
+        "dimension": "ask",
+        "value": "decision"
+      },
+      "priority": 20,
+      "enabled": true,
+      "description": "Why: some systems wait for your approval and say so in the subject: an accounting system such as Fortnox ('Du har leverantörsfakturor att hantera' / 'Utebliven attest', supplier invoices to attest) and an expense system such as Findity ('Ett nytt utlägg väntar på dig', an expense to approve). ask: decision is what the taxonomy calls it ('someone needs your decision, approval or signature'). No accepted Jev value overlaps (ask is never accepted yet). Precision by inspection: both subjects are fixed system texts. On."
+    },
+    {
+      "id": "expiry.deadline",
+      "name": "Certificate, licence and domain expiry notices carry a deadline",
+      "conditions": [
+        {
+          "field": "direction",
+          "op": "is",
+          "value": "in"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "^(?!\\s*(re|sv|fw|fwd|vb|aw|tr|antw)\\s*(\\[[0-9]+\\])?\\s*:)"
+        },
+        {
+          "field": "from_domain",
+          "op": "is_not",
+          "value": "company.example"
+        },
+        {
+          "field": "subject",
+          "op": "not_contains",
+          "value": "discount"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "\\m(ssl|tls)?\\s*certifi(cate|kat)\\M.*(expir|förfaller|går ut)|certificate expiration|licen[cs]es?( key)?( is| are| will)? (about to )?expir|(licens|licenser|licensen) (går ut|förfaller)|maintenance expires|expires (in [0-9]+ days?|today)|(domain|domän)\\M.*(expir|förfaller|går ut)|utgående domän"
+        }
+      ],
+      "action": {
+        "dimension": "ask",
+        "value": "deadline"
+      },
+      "priority": 20,
+      "enabled": true,
+      "description": "Why: certificates, licences, maintenance and domains that expire are the deadlines that bite (a mail server's certificate, OpenVPN Access Server, Veeam maintenance, DigiCert, Let's Encrypt, Apple push certificates, PIM role assignments). Incoming, not a reply or forward, not from a colleague, not a 'discount' offer. Precision by inspection of all matches: about 97% (the misses are a few Azure CDN domain-validation notices). record_account was considered and dropped: Jev calls almost all of these transient, and an expiry notice is a reminder, not a record. On."
+    },
+    {
+      "id": "receipts.record",
+      "name": "Receipts are financial records",
+      "conditions": [
+        {
+          "field": "direction",
+          "op": "is",
+          "value": "in"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "^(?!\\s*(re|sv|fw|fwd|vb|aw|tr|antw)\\s*(\\[[0-9]+\\])?\\s*:)"
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "\\m(e-?kvitto|kvitto|kvittonummer|förnyelsekvitto|receipt)\\M"
+        },
+        {
+          "field": "subject",
+          "op": "not_contains",
+          "value": "Kvitto & Resa"
+        },
+        {
+          "field": "subject",
+          "op": "not_contains",
+          "value": "problem"
+        },
+        {
+          "field": "from_domain",
+          "op": "matches",
+          "value": "^(?!(company\\.example|gmail\\.com|hotmail\\.com|live\\.se|icloud\\.com|me\\.com|outlook\\.com|yahoo\\.[a-z.]+)$)"
+        }
+      ],
+      "action": {
+        "dimension": "value",
+        "value": "record_financial"
+      },
+      "priority": 30,
+      "enabled": true,
+      "description": "Why: a receipt is a financial record to keep for bookkeeping, whoever sends it: Apple, a parking company, a grocery chain, Stripe-billed SaaS, a web shop, domain renewals. Machine subjects with kvitto/receipt, not a reply, not a person's address, not Fortnox's product 'Kvitto & Resa'. It feeds Talos/Keep/Receipts & invoices. Jev agrees on almost every accepted value it shares with this rule, and the matching answer-key items agree. On."
+    },
+    {
+      "id": "kivra.official-letter",
+      "name": "Kivra letters are official letters",
+      "conditions": [
+        {
+          "field": "from_domain",
+          "op": "in",
+          "value": [
+            "kivra.com",
+            "notifications.kivra.com"
+          ]
+        },
+        {
+          "field": "subject",
+          "op": "matches",
+          "value": "^\\s*Nytt (brev|lönebesked) från"
+        }
+      ],
+      "action": {
+        "dimension": "type",
+        "value": "official_letter"
+      },
+      "priority": 30,
+      "enabled": true,
+      "description": "Why: a Kivra letter ('Nytt brev från …', 'Nytt lönebesked från …') is an official document from an authority, employer, pension fund or bank, and belongs with official letters rather than notifications. Jev agrees on every accepted value it shares with this rule, and proposes notification for some not yet accepted, which the rule settles. On."
+    },
+    {
+      "id": "school.topic",
+      "name": "The school platforms are School",
+      "conditions": [
+        {
+          "field": "from_domain",
+          "op": "in",
+          "value": [
+            "school.city.example",
+            "school-platform-a.example",
+            "school-platform-b.example"
+          ]
+        },
+        {
+          "field": "from_address",
+          "op": "not_contains",
+          "value": "culture-school"
+        }
+      ],
+      "action": {
+        "dimension": "topic",
+        "value": "School"
+      },
+      "priority": 30,
+      "enabled": false,
+      "description": "Why: school platforms (school.city.example, platform A, platform B) are School, including the weekly letter. A culture school's senders are left out: that is Family/Kids activities. Most disagreements with Jev are platform A's weekly letter, which Jev calls Newsletters; without them the agreement is high. Off: below 95% against Jev, so it needs your look (is the weekly letter School or Newsletters?)."
+    },
+    {
+      "id": "retired-systems.tag",
+      "name": "Mail from systems the company no longer runs",
+      "conditions": [
+        {
+          "field": "direction",
+          "op": "is",
+          "value": "in"
+        },
+        {
+          "any": [
+            {
+              "field": "from_address",
+              "op": "in",
+              "value": [
+                "veeam@company.example",
+                "backupalert@company.example",
+                "veeam01@company.example",
+                "monitorone@company.example",
+                "veeamone@company.example",
+                "veeamalert@company.example",
+                "larm@company.example",
+                "alert@company.example",
+                "nas1@company.example",
+                "nas2@company.example",
+                "nas3@company.example",
+                "edge-fw@company.example",
+                "sanhq@company.example",
+                "eql@company.example",
+                "vc1@company.example",
+                "centralups@company.example",
+                "robot@company.example",
+                "fakturascan@company.example",
+                "faktura_scan@company.example",
+                "company_scan@company.example"
+              ]
+            },
+            {
+              "field": "from_domain",
+              "op": "in",
+              "value": [
+                "customer-ops.example",
+                "yammer.com",
+                "planner.office365.com",
+                "starleaf.com",
+                "starleaf.info",
+                "newrelic.com",
+                "sumologic.com",
+                "acronis.com",
+                "lansweeper.com",
+                "qnap.com",
+                "bitbucket.org",
+                "company.freshservice.example",
+                "telavox.se",
+                "teamtailor.com",
+                "pdq.com",
+                "synologynotification.com"
+              ]
+            },
+            [
+              {
+                "field": "from_address",
+                "op": "is",
+                "value": "itrobot@company.example"
+              },
+              {
+                "field": "subject",
+                "op": "matches",
+                "value": "^\\s*\\[(Veeam ONE Monitor|nas[123][^]]*)\\]|^\\s*QNAP - Nas2|^\\s*tableau\\.customer\\.example Down!|^\\s*\\[(Success|Warning|Failed)\\] .*\\([0-9]+ machines\\)"
+              }
+            ]
+          ]
+        }
+      ],
+      "action": {
+        "dimension": "tag",
+        "value": "system:retired"
+      },
+      "priority": 40,
+      "enabled": true,
+      "description": "Why: a large share of old work mail comes from systems the company no longer runs (the discovery register, 'Dead systems'): Veeam B&R and Veeam ONE, the Synology NAS boxes nas1/nas2/nas3, QNAP, the Cisco ASA 'edge-fw', EqualLogic SAN HQ, vCenter, a UPS, self-hosted Jira, Yammer, Planner, StarLeaf, New Relic, Sumo Logic, Acronis, Lansweeper, Bitbucket, Freshservice, Telavox, Teamtailor, PDQ, plus itrobot's relays of them. The tag marks them for a cleanup pass without deciding anything else. Tags have no Jev values; as a check, Jev's keep value on them is nearly always short_lived, and the answer keys agree. On (a tag changes nothing else)."
+    }
+  ]
+}

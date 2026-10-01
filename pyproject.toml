@@ -1,0 +1,39 @@
+[project]
+name = "talos"
+version = "0.14.0"
+description = "Talos: a local command center over your own mail, Teams and tasks"
+authors = [
+    { name = "Talos contributors" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "duckdb>=1.5.5",
+    "httpx>=0.28.1",
+    "icalendar>=7.3.0",
+    "imapclient>=4.1.0",
+    "keyring>=25.7.0",
+    "msal>=1.39.0",
+    "openpyxl>=3.1.5",
+    "pillow>=12.3.0",
+    "psycopg[binary]>=3.3.6",
+    "pyarrow>=25.0.1",
+    "pypdf>=6.19.0",
+    "pyyaml>=6.0.3",
+    "recurring-ical-events>=3.8.2",
+    "segno>=1.6.6",
+    "selectolax>=0.4.12",
+    "starlette>=1.7.0",
+    "uvicorn>=0.53.0",
+]
+
+[project.scripts]
+talos = "talos.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
