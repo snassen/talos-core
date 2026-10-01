@@ -11,6 +11,7 @@ Each change goes under **Unreleased** in the same commit that makes it; a releas
 
 ### Added
 - **An MIT license** (LICENSE).
+- **Before you start** (README): what Talos gives you, what it is not, and what you need to bring.
 
 ## [0.14.0] - 2026-10-01
 

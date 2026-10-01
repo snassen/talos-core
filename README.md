@@ -12,6 +12,42 @@ from; nothing automated ever sends. It never deletes anything permanently.
 The design is in [docs/architecture.md](docs/architecture.md); the rules for changing the code
 are in [CLAUDE.md](CLAUDE.md).
 
+## Before you start
+
+**What you get.** One searchable archive of all your mail and Teams, on your own Mac: the originals kept
+untouched, people, organisations, threads and attachments made findable, machine mail turned into events,
+your own rules sorting it, a work board and binders on top, a calendar, writing and sending (only on your
+confirmation), and a monitor that tells you when something stops. It all lives on your Mac, in no one
+else's cloud; nothing leaves it except to the services you connect.
+
+**What it is not.** Talos is not a finished product you install and open. It was built by one person for
+their own mail, accounts and language (Swedish and English), and it is shared as it is. Expect an
+afternoon of setup at the least, and some reading of the code when your setup differs from the examples.
+
+**What you need to bring:**
+
+- **A Mac that stays on**, with Homebrew, uv and PostgreSQL 18 (with pgvector), and room for your mail:
+  the vault is about as large as all your mailboxes together.
+- **Your accounts, connected by you.** Gmail through an app password (two-step verification on); Microsoft
+  365 mail, calendar and Teams through an app registration in your organisation's Entra (with an
+  administrator's consent for the permissions); a Google calendar through an OAuth client of your own; iCloud
+  and other IMAP accounts through app passwords. Every
+  secret goes in the macOS Keychain, typed by you.
+- **Your personal part**: who you are, your accounts, your rules and how your mail should be sorted, in
+  `~/TalosData/config` (`talos config init` starts it from the examples). Talos runs on the examples
+  without it, but it only becomes yours once you fill it in.
+- **A model for judging mail, if you want one.** Rules and your own decisions work on their own. The
+  automatic judging of new mail (what it is, whether it asks something of you) uses **Jev**, a paid hosted
+  classifier with an API key of your own; another model needs an adapter written for it (`talos.jev` is
+  the one to copy).
+- **An AI coding agent, recommended.** Talos is built to be changed by you with an agent (Claude Code,
+  Codex or similar): the repository carries the rules for it (`CLAUDE.md`) and a skill
+  (`.agents/skills/talos-dev`). Adapting Talos to your accounts and habits is easiest that way.
+- **Optional:** Tailscale, to reach Talos Web from your phone, and a hosted heartbeat (such as
+  healthchecks.io) for the monitor.
+
+The first full sync of a large mailbox takes hours; everything after it is incremental.
+
 ## Start
 
 The full walk-through, including how to set up your personal part (in a private repository of your own,

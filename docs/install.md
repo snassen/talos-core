@@ -17,14 +17,14 @@ Secrets are a third thing: they live in the macOS Keychain and nowhere else, not
 - PostgreSQL 18, on port **5433** (5432 is often taken by something else):
 
   ```bash
-  brew install postgresql@18
+  brew install postgresql@18 pgvector
   brew services start postgresql@18      # then set port = 5433 in its postgresql.conf and restart
   ```
 
 ## 2. The code
 
 ```bash
-git clone https://github.com/<owner>/talos.git
+git clone <this repository's URL> talos      # the green Code button on GitHub
 cd talos
 uv sync
 ```
