@@ -16,6 +16,7 @@ for their instance, on top of the ones here.
 uv run pytest -q                    # all tests; needs PostgreSQL on port 5433 (creates talos_test)
 uv run talos setup                  # create/migrate the real database and seed the accounts
 uv run talos status                 # what is synced, and whether each secret is present
+uv run talos doctor                 # is everything ready, and the next step (talos-doctor; reads only)
 uv run talos serve                  # UI on http://127.0.0.1:7420
 
 # UI work against invented data, never the real archive:

@@ -10,6 +10,9 @@ Each change goes under **Unreleased** in the same commit that makes it; a releas
 ## [Unreleased]
 
 ### Added
+- **`talos doctor`**: is this Mac ready for Talos, and the next step for anything missing, with step-by-step
+  guides (Gmail, Microsoft 365, PostgreSQL, your personal part, the services…). It is talos-doctor, its own
+  product in its own repository; Talos runs it, from its repository when it is not installed. It reads only.
 - **An MIT license** (LICENSE).
 - **Before you start** (README): what Talos gives you, what it is not, and what you need to bring.
 

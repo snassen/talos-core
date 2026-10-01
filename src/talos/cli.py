@@ -2,6 +2,7 @@
 
     talos setup                       create the database, apply migrations, seed accounts, load the taxonomy
     talos status                      counts, last sync per account, secrets present or not
+    talos doctor [ARGS…]              is this Mac ready, and the next step (talos-doctor; --guides, --only PHASE, --json)
     talos where [--json] [--write F]  where everything is, and why: code, personal part, data, database, Keychain
                                       (names only), services, backups
     talos config init [--dir DIR]     make your personal part from the examples (never overwrites); config path
@@ -242,6 +243,40 @@ def cmd_discovery(a, s):
         except discovery.DiscoveryError as exc:
             print(f"talos: {exc}", file=sys.stderr)
             raise SystemExit(2) from None
+
+
+def doctor_url(remote: str | None) -> str | None:
+    """talos-doctor's repository, beside this one: the same owner's talos-doctor on the same host."""
+    import re
+    m = re.match(r"^(?:https://|git@)([^/:]+)[/:]([^/]+)/[^/]+?(?:\.git)?/?$", (remote or "").strip())
+    return f"https://{m.group(1)}/{m.group(2)}/talos-doctor" if m else None
+
+
+def cmd_doctor(a, s):
+    """talos-doctor, its own product (talos-doctor's repository, beside this one): installed in Talos's
+    environment, else on the PATH (uv tool install), else run from its repository with uvx. It reads only."""
+    import shutil
+    import subprocess
+
+    from talos import personal
+    args = ["--repo", str(personal.REPO), *a.args]
+    try:
+        from talos_doctor import cli as doctor
+    except ImportError:
+        doctor = None
+    if doctor:
+        raise SystemExit(doctor.main(args))
+    if exe := shutil.which("talos-doctor"):
+        raise SystemExit(subprocess.call([exe, *args]))
+    remote = subprocess.run(["git", "-C", str(personal.REPO), "remote", "get-url", "origin"],
+                            capture_output=True, text=True).stdout
+    url = doctor_url(remote)
+    if url and shutil.which("uvx"):
+        print(f"(talos-doctor is not installed: running it from {url})", file=sys.stderr)
+        raise SystemExit(subprocess.call(["uvx", "--from", f"git+{url}", "talos-doctor", *args]))
+    print("talos-doctor is not installed. Install it from its repository (beside this one):\n"
+          "    uv tool install git+<the talos-doctor repository's URL>", file=sys.stderr)
+    raise SystemExit(2)
 
 
 def cmd_where(a, s):
@@ -1407,6 +1442,9 @@ def cmd_argus(a, s):
 
 
 def main(argv: list[str] | None = None) -> None:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["doctor"]:   # everything after it is talos-doctor's own (argparse would take its --options)
+        cmd_doctor(argparse.Namespace(args=argv[1:]), None)
     p = argparse.ArgumentParser(prog="talos", description="Talos: a local command center over your own mail.")
     p.add_argument("-v", "--verbose", action="store_true")
     from talos import __version__
@@ -1414,6 +1452,8 @@ def main(argv: list[str] | None = None) -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("setup").set_defaults(fn=cmd_setup)
     sub.add_parser("status").set_defaults(fn=cmd_status)
+    sub.add_parser("doctor", help="is this Mac ready for Talos, and the next step (talos-doctor; reads only; "
+                                  "talos doctor --help for its options)")
     x = sub.add_parser("where", help="where everything is, and why: the code, your personal part, the data, the database,"
                                      " the Keychain (names only), the services and the backups")
     x.add_argument("--json", action="store_true")

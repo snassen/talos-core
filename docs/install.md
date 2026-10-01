@@ -11,6 +11,11 @@ Secrets are a third thing: they live in the macOS Keychain and nowhere else, not
 
 `talos where` shows, at any time, where each part is on your machine and why it lives there.
 
+Before each step, and after it, `talos-doctor` says what is ready and what the next step is (it reads
+only). Run it from its repository with `uvx --from git+<the talos-doctor repository's URL> talos-doctor`,
+or, once the code is installed, as `uv run talos doctor`. `talos doctor --guides` lists its step-by-step
+guides, for example `--guide microsoft-365` for registering the app in Entra.
+
 ## 1. What you need
 
 - A Mac with [Homebrew](https://brew.sh) and [uv](https://docs.astral.sh/uv/).

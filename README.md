@@ -48,6 +48,11 @@ afternoon of setup at the least, and some reading of the code when your setup di
 
 The first full sync of a large mailbox takes hours; everything after it is incremental.
 
+**talos-doctor checks all of this for you**, before and after installing: it reads only, says what is
+missing, and gives the next step or a step-by-step guide for each part (Gmail, Microsoft 365, PostgreSQL,
+your personal part…). It is its own small product, in the `talos-doctor` repository beside this one; with
+only uv installed, run `uvx --from git+<its URL> talos-doctor`, and inside Talos, `uv run talos doctor`.
+
 ## Start
 
 The full walk-through, including how to set up your personal part (in a private repository of your own,
