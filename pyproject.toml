@@ -5,6 +5,8 @@ description = "Talos: a local command center over your own mail, Teams and tasks
 authors = [
     { name = "Talos contributors" }
 ]
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = [
     "duckdb>=1.5.5",

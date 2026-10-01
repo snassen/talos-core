@@ -69,3 +69,7 @@ The release notes are in [CHANGELOG.md](CHANGELOG.md) (and under the version num
 
 How to work on Talos, and what is firm, is in [CONTRIBUTING.md](CONTRIBUTING.md). Report a vulnerability
 privately, never in a public issue: [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT: see [LICENSE](LICENSE).

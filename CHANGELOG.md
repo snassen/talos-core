@@ -9,6 +9,9 @@ Each change goes under **Unreleased** in the same commit that makes it; a releas
 
 ## [Unreleased]
 
+### Added
+- **An MIT license** (LICENSE).
+
 ## [0.14.0] - 2026-10-01
 
 ### Added
